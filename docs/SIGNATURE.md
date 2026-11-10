@@ -1,7 +1,7 @@
-# Dělení buňky — signature (draft, not yet reviewed by Pavol)
+# Na medicínu — signature (draft, not yet reviewed by Pavol)
 
-An explainer, not a registered flywheel product. This file records which classics shaped it,
-so the moves can be judged and, if approved, generalized into a standard for explainers.
+Registered in the flywheel as `medicina` (pet track). This file records which classics shaped
+the lessons, so the moves can be judged and, if approved, generalized into a standard for explainers.
 
 ## Lineage
 
@@ -37,3 +37,6 @@ rim-darkening shader. Fraunces for names and numerals, Figtree for text.
 ## Added the same evening
 
 6. **Optional narration** (`proposed`). A Czech voice reads the phase; the clip's clock drives the animation and the word being spoken is marked on the page. Lineage: Comenius again (word, picture and sound together); Mayer's modality and signalling principles (2001). Voice: Piper `cs_CZ-jirka-medium`, local, CC0 dataset. The cloned house voice (Qwen3-TTS) was tried and does not speak Czech intelligibly.
+
+7. **Progress measures depth, not points** (`proposed`). The record is a set of marks: what was looked at, which parts were opened, which "Víc do hloubky" and which questions were read, what was found, named and ordered. The home page shows them as plain counts per lesson. Nothing is ever taken away and nothing is scored. Lineage: Montessori's record of work, kept for the teacher and the child, in place of grades.
+8. **The workbook leads** (`proposed`). Terms, the number of phases and the checkpoints follow the learner's own school workbook; where a university textbook says more, the lesson says so inside the deeper level.
