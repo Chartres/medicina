@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["mlx-whisper", "soundfile", "numpy"]
 # ///
-"""Narration for site/v2: one clip per phase plus the start time of every word on the page.
+"""Narration for the deleni-bunky lesson: one clip per phase plus the start time of every word on the page.
 
   node voice/dump.mjs && voice/build.py
 
@@ -16,10 +16,10 @@ os.environ.setdefault("HF_HUB_OFFLINE", "1")
 import mlx_whisper, soundfile as sf
 
 HERE = pathlib.Path(__file__).parent
-OUT = HERE.parent / "site/v2/audio"
+OUT = HERE.parent / "public/deleni-bunky/audio"
 MODEL = HERE / "models/cs_CZ-jirka-medium.onnx"
 # how to say what the page writes; one page word stays one entry
-SAY = {"I": "jedna", "II": "dvě", "DNA": "dé en á", "S-fázi": "es fázi", "2n": "dvě en", "n": "en",
+SAY = {"I": "jedna", "II": "dvě", "G₁": "gé jedna", "G₂": "gé dvě", "G₀": "gé nula", "S": "es", "K₁": "ká jedna", "K₂": "ká dvě", "RNA": "er en á", "DNA": "dé en á", "S-fázi": "es fázi", "2n": "dvě en", "n": "en",
        "crossing-overu": "krosing ouvru", "crossing-over": "krosing ouvr"}
 
 

@@ -1,24 +1,24 @@
-# Dělení buňky
+# Na medicínu
 
-An interactive model of mitosis and meiosis in Czech, for a gymnázium student. No build step,
-no dependencies, no server: each version is one HTML file.
+Interactive biology lessons in Czech for medical-school entrance prep. Live at https://medicina.dravec.org.
 
-- **v1** — `site/index.html` · https://deleni-bunky.pages.dev/ · 2D canvas, scrubber, labels, a phase quiz.
-- **v2** — `site/v2/index.html` · https://deleni-bunky.pages.dev/v2/ · procedural 3D (raw WebGL), numbered parts
-  that open into detail, four lesson steps (Prohlížej, Najdi, Pojmenuj, Seřaď), optional narration that
-  drives the animation and marks the spoken word.
+- `/` — the course: lessons in workbook order, with the learner's progress.
+- `/deleni-bunky/` — Buněčný cyklus a dělení buněk: procedural 3D (raw WebGL), numbered parts that open into detail, four lesson steps (Prohlížej, Najdi, Pojmenuj, Seřaď), optional narration that drives the animation and marks the spoken word.
+- `/deleni-bunky/v1/` — the first, flat version of that lesson, kept as it was.
 
-The model uses 2n = 4. Both divisions run from one keyframed state function (`divState`), so
+Progress is a set of marks kept in the browser; signing in (e-mail link or code, no password) syncs it between devices. Stack: Vite + TypeScript, no framework; see `AGENTS.md`.
+
+The cell model uses 2n = 4. Both divisions run from one keyframed state function (`divState`), so
 meiosis II starts exactly where meiosis I ends.
 
 ## Check
 
-    node test.mjs
+    npm test          # progress logic, signals contract
+    npm run e2e       # builds, then walks the lesson in Chrome
 
 Sweeps both modes at desktop and phone width, checks the chromosome counts, the seam between the
 two meiotic divisions, that the four gametes differ, that the spindle never crosses an intact
-nuclear envelope, and walks every lesson step and the narration. Needs Playwright (the path at the
-top of the file) and Google Chrome.
+nuclear envelope, and walks every lesson step and the narration. Needs Google Chrome.
 
 ## Narration
 
@@ -31,5 +31,5 @@ Whisper listening to the result. Re-run both after any change to a phase's name,
 ## Content
 
 Written at gymnázium level and checked by two independent reviews against standard sources;
-corrections applied on 2026-11-10. `SIGNATURE.md` lists the teaching ideas behind v2 and where
+corrections applied on 2026-11-10. `docs/SIGNATURE.md` lists the teaching ideas behind v2 and where
 they come from.

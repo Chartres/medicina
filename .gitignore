@@ -1,6 +1,9 @@
+node_modules/
+dist/
 shots/
 voice/models/
 voice/try/
 voice/try_qwen.py
-.DS_Store
 .wrangler/
+.env.local
+.DS_Store

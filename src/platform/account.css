@@ -1,0 +1,14 @@
+#account{display:flex;align-items:center;gap:10px;min-width:0}
+.acc-who{max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mute);font-size:15px}
+.acc-btn{border:0;background:var(--fill);color:var(--ink);border-radius:4px;min-height:44px;padding:0 16px;font:inherit;cursor:pointer}
+.acc-slab{border:0;background:var(--ink);color:var(--bg);font:inherit;font-weight:600;border-radius:4px;min-height:48px;padding:0 22px;cursor:pointer}
+#accDialog{border:0;border-radius:6px;padding:0;background:var(--bg);color:var(--ink);width:min(92vw,440px)}
+#accDialog::backdrop{background:rgb(0 0 0/.45)}
+.acc-form{display:grid;gap:14px;padding:24px}
+.acc-form h2{font:500 28px/32px var(--serif);margin:0;letter-spacing:-.01em}
+.acc-form p{margin:0;max-width:none}
+.acc-form label{display:grid;gap:6px;font:500 13px/18px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.acc-form input{font:17px/26px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink);background:var(--fill);border:0;border-radius:4px;min-height:48px;padding:0 14px}
+.acc-form input:focus{outline:2px solid var(--ink)}
+.acc-code{display:grid;gap:14px}
+.acc-msg:empty{display:none}

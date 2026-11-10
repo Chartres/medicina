@@ -1,24 +1,29 @@
 {
  "mitoza": [
   [
-   "Interfáze",
-   "Jedno velké jádro, chromozomy nejsou vidět.",
-   "Buňka roste a chystá se na dělení. V S-fázi zdvojí DNA, takže každý chromozom má pak dvě sesterské chromatidy. Chromatin je rozvolněný. Zdvojí se i centrozom. Interfáze k samotné mitóze nepatří, je to příprava na ni."
+   "G₁ fáze",
+   "Menší buňka, jeden centrozom, chromatin v jedné kopii.",
+   "Buňka po předchozím dělení roste, vyrábí RNA a bílkoviny a přibývá jí organel. Na konci je kontrolní bod K₁: buňka ověří, že je připravená zdvojit DNA. Buňka, která se dál dělit nemá, odejde do klidové fáze G₀ a jen vykonává svou funkci, dočasně nebo natrvalo."
+  ],
+  [
+   "S fáze",
+   "Po vláknech chromatinu běží oranžové značky: DNA se kopíruje.",
+   "Probíhá replikace DNA. Každý chromozom má potom dvě sesterské chromatidy spojené v centromeře. Počet chromozomů se nemění, zdvojnásobí se jen množství DNA. Zdvojí se i centrozom."
+  ],
+  [
+   "G₂ fáze",
+   "Velká buňka, dva centrozomy, chromatin už ve dvou kopiích.",
+   "Buňka dál roste a vyrábí bílkoviny a organely, aby jich bylo dost pro obě dceřiné buňky. Kontrolní bod K₂ ověří, že je DNA zkopírovaná správně. Teprve potom začne mitóza."
   ],
   [
    "Profáze",
-   "Chromozomy se zviditelňují, jádro ještě drží.",
-   "Chromatin se spiralizuje do krátkých tlustých chromozomů. Centrozomy se rozcházejí k opačným pólům a mezi nimi roste dělicí vřeténko. Jadérko mizí."
-  ],
-  [
-   "Prometafáze",
-   "Jaderný obal se rozpadá, chromozomy se hýbou ke středu.",
-   "Jaderný obal se rozpadne na váčky. Vlákna vřeténka se chytají kinetochorů na centromerách a tahají chromozomy do středu buňky."
+   "Chromozomy se zviditelňují, jaderný obal se rozpadá.",
+   "Chromatin se spiralizuje do krátkých tlustých chromozomů. Centrozomy se rozcházejí k opačným pólům a mezi nimi vzniká dělicí vřeténko. Jadérko mizí. Na konci se rozpadne jaderný obal a vlákna vřeténka se chytí chromozomů. Některé učebnice tenhle závěr vyčleňují jako prometafázi."
   ],
   [
    "Metafáze",
    "Chromozomy srovnané v jedné rovině uprostřed.",
-   "Chromozomy leží v ekvatoriální rovině. Každá chromatida je připojená k jinému pólu. Jsou teď nejkratší a nejlépe vidět, proto se z metafáze dělá karyotyp. Buňka čeká, dokud nejsou připojené všechny."
+   "Chromozomy leží v ekvatoriální rovině, destičce, uprostřed buňky. Každá chromatida je připojená k jinému pólu. Jsou teď nejkratší a nejlépe vidět, proto se z metafáze dělá karyotyp. Buňka čeká, dokud nejsou připojené všechny."
   ],
   [
    "Anafáze",
