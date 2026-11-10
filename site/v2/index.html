@@ -613,11 +613,13 @@ function syncUI(){
 function setT(x,keep){t=Math.max(0,Math.min(1,x));if(!keep){playing=false;playlist=null;stopVoice();}syncUI();}
 
 // ---------- optional narration: the clip drives the animation and marks the word being spoken ----------
-const voice={on:false,data:null,audio:new Audio(),seg:-1,words:[],cur:-1};
+const voice={on:false,data:null,audio:new Audio(),seg:-1,words:[],cur:-1,blobs:{}};
+// clips are fetched whole and played from memory: the host does not answer byte-range requests, which iPhone Safari needs
+function preload(){segs().forEach((_,i)=>{const k=`${mode}-${i}`;if(!voice.blobs[k])fetch(`audio/${k}.m4a`).then(r=>r.blob()).then(b=>voice.blobs[k]=URL.createObjectURL(b)).catch(()=>{});});}
 fetch('audio/timings.json').then(r=>r.ok?r.json():null).then(d=>{if(d){voice.data=d;$('voiceBtn').hidden=step!=='explore';}}).catch(()=>{});
 function wrap(el,text){el.textContent='';for(const w of text.split(/\s+/)){const sp=document.createElement('span');sp.textContent=w;el.append(sp,' ');voice.words.push(sp);}}
 function stopVoice(){voice.audio.pause();voice.seg=-1;voice.words[voice.cur]?.classList.remove('say');voice.cur=-1;}
-function startClip(i){voice.seg=i;voice.audio.src=`audio/${mode}-${i}.m4a`;voice.audio.play().catch(()=>{playing=false;syncUI();});$('dWhat').open=true;}
+function startClip(i){voice.seg=i;voice.audio.src=voice.blobs[`${mode}-${i}`]||`audio/${mode}-${i}.m4a`;voice.audio.play().catch(()=>{playing=false;syncUI();});$('dWhat').open=true;}
 function voiceTick(){
   const c=voice.data[mode][voice.seg],ct=voice.audio.currentTime;
   t=segStart(voice.seg)+segs()[voice.seg].w/total()*Math.min(.999,Math.max(.001,ct/c.dur));
@@ -626,7 +628,7 @@ function voiceTick(){
   voice.words[k]?.classList.add('say');
 }
 voice.audio.onended=()=>{if(!playing||!voice.on)return;const i=voice.seg+1;if(i<segs().length)startClip(i);else{t=1;playing=false;stopVoice();syncUI();}};
-$('voiceBtn').onclick=()=>{voice.on=!voice.on;$('voiceBtn').setAttribute('aria-pressed',voice.on);if(!voice.on)stopVoice();else if(playing)startClip(locate(t).i);};
+$('voiceBtn').onclick=()=>{voice.on=!voice.on;$('voiceBtn').setAttribute('aria-pressed',voice.on);if(!voice.on)stopVoice();else{preload();if(playing)startClip(locate(t).i);}};
 function buildPhases(){
   $('phases').innerHTML='';
   segs().forEach((s,i)=>{const b=document.createElement('button');b.style.flex=s.w;b.title=s.name;b.innerHTML=`<span>${mode==='meioza'?s.name.replace('fáze',''):s.name}</span>`;b.setAttribute('aria-label',s.name);b.onclick=()=>setT(segStart(i)+.0005);$('phases').append(b);});
@@ -634,7 +636,7 @@ function buildPhases(){
 function setMode(m){
   mode=m;segIdx=-1;lastStats='';
   $('m-mitoza').setAttribute('aria-pressed',m==='mitoza');$('m-meioza').setAttribute('aria-pressed',m==='meioza');
-  buildPhases();setFocus(null);setT(0);setStep(step);
+  buildPhases();setFocus(null);setT(0);setStep(step);if(voice.on)preload();
 }
 function setStep(s){
   step=s;playing=false;playlist=null;stopVoice();$('voiceBtn').hidden=s!=='explore'||!voice.data;if(s!=='explore')setFocus(null);
