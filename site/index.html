@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dělení buňky – mitóza a meióza krok za krokem</title>
+<meta name="description" content="Interaktivní model mitózy a meiózy. Posouvej časem, sleduj chromozomy a nech se vyzkoušet z fází.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070d; --field:#0b1226; --ink:#e9edf9; --mute:#8d96b3; --line:#1d2640;
+  --m:#ff5fa2; --p:#4cc9ff; --tub:#86f28f; --act:#ffb347;
+  --serif:"Fraunces",Georgia,serif; --sans:"Figtree",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--sans)}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--tub);outline-offset:3px}
+
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding:16px clamp(16px,3vw,40px)}
+h1{font:500 1.35rem/1 var(--serif);margin:0;margin-right:auto;letter-spacing:-.01em}
+.switch{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px}
+.switch button{border:0;background:none;padding:7px 18px;border-radius:999px;cursor:pointer;color:var(--mute)}
+.switch button[aria-pressed=true]{background:var(--ink);color:var(--bg);font-weight:600}
+.tools{display:flex;align-items:center;gap:18px}
+.check{display:flex;align-items:center;gap:8px;color:var(--mute);cursor:pointer}
+.check input{accent-color:var(--tub);width:18px;height:18px}
+.ghost{border:1px solid var(--tub);color:var(--tub);background:none;border-radius:999px;padding:7px 18px;cursor:pointer}
+.ghost:hover{background:var(--tub);color:var(--bg)}
+
+main{display:grid;gap:0 clamp(24px,4vw,56px);padding:0 clamp(16px,3vw,40px) 40px}
+@media(min-width:960px){main{grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr);align-items:start}}
+
+.stage{background:radial-gradient(circle at 50% 46%,#111b3a 0%,#080d1c 58%,#04060c 100%);border-radius:6px;overflow:hidden}
+canvas{display:block;width:100%;height:min(66vh,700px);touch-action:pan-y}
+@media(max-width:959px){canvas{height:min(100vw,58vh)}}
+
+.transport{display:flex;align-items:center;gap:16px;margin-top:16px}
+#play{flex:none;width:48px;height:48px;border-radius:50%;border:0;background:var(--tub);cursor:pointer;display:grid;place-items:center}
+#play svg{width:18px;height:18px;fill:var(--bg)}
+.track{flex:1;min-width:0}
+#scrub{width:100%;margin:0;accent-color:var(--tub);display:block}
+.phases{display:flex;gap:3px;margin-top:8px}
+.phases button{min-width:0;border:0;background:none;padding:0;cursor:pointer;text-align:left;color:var(--mute);font-size:.72rem;line-height:1.25}
+.phases button::before{content:"";display:block;height:6px;border-radius:3px;background:var(--line);margin-bottom:6px}
+.phases button.past::before{background:#3e7a4a}
+.phases button.now::before{background:var(--tub)}
+.phases button.now{color:var(--ink)}
+.phases span{display:block;overflow-wrap:normal;padding-right:2px}
+@media(max-width:700px){.phases span{display:none}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin:14px 0 0;padding:0;list-style:none;color:var(--mute);font-size:.82rem}
+.legend i{display:inline-block;width:18px;height:6px;border-radius:3px;margin-right:7px;vertical-align:middle}
+
+.panel{padding-top:8px}
+@media(max-width:959px){.panel{padding-top:28px}}
+.count{color:var(--mute);font-size:.9rem;margin:0 0 6px}
+h2{font:500 clamp(2.6rem,5.2vw,4.4rem)/1 var(--serif);letter-spacing:-.025em;margin:0 0 14px;font-variation-settings:"opsz" 144}
+.tip{font:italic 400 1.2rem/1.35 var(--serif);color:var(--tub);margin:0 0 16px;max-width:30ch}
+.desc{margin:0 0 26px;max-width:46ch}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;border-top:1px solid var(--line);padding-top:16px;margin:0}
+.nums dt{color:var(--mute);font-size:.8rem;line-height:1.3;order:2}
+.nums div{display:flex;flex-direction:column}
+.nums dd{margin:0;font:500 2rem/1.1 var(--serif);order:1;transition:color .4s}
+.nums dd.flash{color:var(--act)}
+.nums-note{color:var(--mute);font-size:.8rem;margin:10px 0 0}
+
+.quiz h2{font-size:clamp(2rem,3.6vw,2.8rem)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px}
+.opts button{border:1px solid var(--line);background:none;border-radius:6px;padding:11px 12px;cursor:pointer;text-align:left}
+.opts button:hover:not(:disabled){border-color:var(--mute)}
+.opts button.ok{border-color:var(--tub);background:#86f28f22}
+.opts button.bad{border-color:var(--m);background:#ff5fa222}
+.opts button:disabled{cursor:default}
+.verdict{min-height:4.6em;margin:0 0 14px;max-width:44ch}
+.verdict b{font-weight:600}
+.score{color:var(--mute);font-size:.9rem;margin:14px 0 0}
+[hidden]{display:none!important}
+
+.compare{padding:24px clamp(16px,3vw,40px) 64px;max-width:980px}
+.compare h3{font:500 1.7rem/1.1 var(--serif);margin:0 0 16px}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;vertical-align:top;padding:10px 16px 10px 0;border-top:1px solid var(--line)}
+thead th{border:0;font:500 1.15rem var(--serif)}
+tbody th{color:var(--mute);font-weight:400;width:26%}
+.foot{color:var(--mute);font-size:.82rem;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Dělení buňky</h1>
+  <div class="switch" role="group" aria-label="Typ dělení">
+    <button id="m-mitoza" aria-pressed="true">Mitóza</button>
+    <button id="m-meioza" aria-pressed="false">Meióza</button>
+  </div>
+  <div class="tools">
+    <label class="check"><input type="checkbox" id="labels" checked> Popisky</label>
+    <button class="ghost" id="quizBtn">Vyzkoušej mě</button>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="stage"><canvas id="cv" role="img" aria-label="Animovaný model dělící se buňky"></canvas></div>
+    <div class="transport" id="transport">
+      <button id="play" aria-label="Přehrát"><svg viewBox="0 0 18 18"><path id="playIcon" d="M4 2l12 7-12 7z"/></svg></button>
+      <div class="track">
+        <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Průběh dělení">
+        <div class="phases" id="phases"></div>
+      </div>
+    </div>
+    <ul class="legend">
+      <li><i style="background:var(--m)"></i>chromozom od matky</li>
+      <li><i style="background:var(--p)"></i>chromozom od otce</li>
+      <li><i style="background:var(--tub)"></i>dělicí vřeténko</li>
+      <li><i style="background:var(--act)"></i>zaškrcení, crossing-over</li>
+    </ul>
+  </section>
+
+  <section class="panel" id="learn" aria-live="polite">
+    <p class="count" id="count"></p>
+    <h2 id="name"></h2>
+    <p class="tip" id="tip"></p>
+    <p class="desc" id="desc"></p>
+    <dl class="nums">
+      <div><dt>chromozomů v buňce</dt><dd id="nChr"></dd></div>
+      <div><dt>molekul DNA (chromatid)</dt><dd id="nDna"></dd></div>
+      <div><dt>sada</dt><dd id="nSet"></dd></div>
+    </dl>
+    <p class="nums-note">Model má 2n = 4, aby se dal uhlídat. Člověk má 2n = 46.</p>
+  </section>
+
+  <section class="panel quiz" id="quiz" hidden>
+    <p class="count" id="qMode"></p>
+    <h2>Která fáze to je?</h2>
+    <div class="opts" id="opts"></div>
+    <p class="verdict" id="verdict"></p>
+    <button class="ghost" id="next" hidden>Další buňka</button>
+    <p class="score" id="score"></p>
+  </section>
+</main>
+
+<section class="compare">
+  <h3>Mitóza a meióza vedle sebe</h3>
+  <table>
+    <thead><tr><th></th><th>Mitóza</th><th>Meióza</th></tr></thead>
+    <tbody>
+      <tr><th>Kde probíhá</th><td>tělní (somatické) buňky</td><td>pohlavní orgány při vzniku gamet, u rostlin spor</td></tr>
+      <tr><th>Počet dělení</th><td>jedno</td><td>dvě po sobě, DNA se zdvojí jen před prvním</td></tr>
+      <tr><th>Výsledek</th><td>2 buňky</td><td>4 buňky</td></tr>
+      <tr><th>Sada chromozomů</th><td>2n → 2n</td><td>2n → n</td></tr>
+      <tr><th>Crossing-over</th><td>ne</td><td>ano, v profázi I</td></tr>
+      <tr><th>Co se rozchází v anafázi</th><td>sesterské chromatidy</td><td>v anafázi I celé homologní chromozomy, v anafázi II chromatidy</td></tr>
+      <tr><th>Dceřiné buňky</th><td>geneticky shodné s mateřskou</td><td>každá jiná</td></tr>
+      <tr><th>K čemu slouží</th><td>růst, obnova tkání, nepohlavní rozmnožování</td><td>pohlavní rozmnožování a genetická variabilita</td></tr>
+    </tbody>
+  </table>
+  <p class="foot">Mezerník spouští a zastavuje přehrávání, šipky posouvají čas.</p>
+</section>
+
+<script>
+'use strict';
+// ---------- math ----------
+const PI=Math.PI, lerp=(a,b,t)=>a+(b-a)*t, ease=t=>t*t*(3-2*t);
+function kf(u,pts){
+  if(u<=pts[0][0])return pts[0][1];
+  for(let i=1;i<pts.length;i++)if(u<=pts[i][0]){const[a,va]=pts[i-1],[b,vb]=pts[i];return lerp(va,vb,ease((u-a)/(b-a)));}
+  return pts[pts.length-1][1];
+}
+const kf2=(u,pts)=>[kf(u,pts.map(p=>[p[0],p[1][0]])),kf(u,pts.map(p=>[p[0],p[1][1]]))];
+const rotv=([x,y],a)=>[x*Math.cos(a)-y*Math.sin(a),x*Math.sin(a)+y*Math.cos(a)];
+
+// ---------- chromosome sets (2n = 4: one long pair, one short pair) ----------
+const COL={m:'#ff5fa2',p:'#4cc9ff'}, TUB='134,242,143', ACT='#ffb347';
+const B=.06, SC=.76, DX=.9;            // homolog half-spacing; daughter scale; daughter centre
+const base=[
+  {id:0,len:.30,cf:.5, col:'m',home:[-.17,-.13],rot:.5, jit:.4},
+  {id:1,len:.30,cf:.5, col:'p',home:[.15,.17], rot:-.7,jit:-.5},
+  {id:2,len:.21,cf:.36,col:'m',home:[.16,-.16],rot:1.1,jit:.6},
+  {id:3,len:.21,cf:.36,col:'p',home:[-.14,.16],rot:-.3,jit:-.35},
+];
+const SETS={};
+SETS.mit=base.map((c,i)=>({...c,plate:[0,[-.42,.17,.465,-.125][i]],e:[c.home[0]*.6,c.home[1]*.6],tip:{}}));
+// meiosis I: bivalents; second pair flipped (independent assortment). Inner chromatids carry the crossover.
+const m1=[{plate:[-B,-.2],e:[-.02,-.1]},{plate:[B,-.2],e:[.02,-.1]},{plate:[B,.2],e:[-.03,.11]},{plate:[-B,.2],e:[.03,.11]}];
+SETS.mei1=base.map((c,i)=>({...c,...m1[i],paired:rotv(m1[i].plate,.5),tip:{[-Math.sign(m1[i].plate[0])]:true}}));
+// meiosis II: each daughter inherits its chromosomes exactly where telophase I left them
+const mei2=theta=>SETS.mei1.filter(c=>Math.sign(c.plate[0])===Math.sign(theta)).map((c,k)=>{
+  const h=rotv(c.e,-theta);
+  return {...c,home:[h[0]/SC,h[1]/SC],rot:c.jit-theta,plate:[0,c.len>.25?-.17:.15],e:[.03*(k?1:-1),k?.09:-.08],jit:k?.5:-.4};
+});
+SETS.mei2L=mei2(-PI/2); SETS.mei2R=mei2(PI/2);
+
+// ---------- state of one dividing cell at generic phase u (0 interphase … 7 two cells) ----------
+function divState(kind,u,set,time){
+  const S={kind,u,set};
+  S.r=kf(u,[[4,1],[5,.93],[6,.82],[7,SC]]);
+  S.d=kf(u,[[4,0],[5,.33],[6,.64],[7,DX]]);
+  S.q=kf(u,[[4,0],[5,.56],[6,.66],[7,DX]]);
+  S.c=kf(u,[[1,0],[2.3,1],[5.1,1],[6.2,0]]);
+  S.envA=kf(u,[[2,1],[2.6,0]]); S.nlA=kf(u,[[1.1,1],[1.9,0]]);
+  S.dEnvA=kf(u,[[5.3,0],[6.1,1]]); S.dNlA=kf(u,[[5.9,0],[6.6,1]]);
+  S.astA=kf(u,[[.9,0],[1.5,1],[5.2,1],[6.2,0]]);
+  S.polA=kf(u,[[1.2,0],[2.4,1],[5,1],[5.9,0]]);
+  S.kA=kf(u,[[2.05,0],[2.9,1],[5,1],[5.6,0]]);
+  S.ringA=kf(u,[[5,0],[5.4,1],[6.6,1],[6.95,0]]);
+  S.plateA=kf(u,[[2.8,0],[3.1,1],[3.9,1],[4.15,0]]);
+  if(u<1)S.cen=[kf(u,[[.5,0],[1,.046]]),-.58];
+  else if(u<2.2){const a=kf(u,[[1,.08],[2.2,PI/2]]),rho=lerp(.58,.62,a/(PI/2));S.cen=[rho*Math.sin(a),-rho*Math.cos(a)];}
+  else S.cen=[kf(u,[[2.2,.62],[4,.62],[5,.84],[6,1],[7,DX+.58*SC]]),0];
+
+  const g=kf(u,[[5,0],[6.1,1]]), yc=kf(u,[[4,1],[5,.55]]);
+  const jig=kf(u,[[2,0],[2.5,.02],[3.3,.006],[4,0]]);
+  const bA=kind==='mei2'?1:kf(u,[[.35,0],[.9,1]]);
+  const vAmt=kf(u,[[4,0],[4.4,1],[5.3,1],[6.2,0]]);
+  S.xo=kind==='mei1'?kf(u,[[1.55,0],[1.95,1]]):1;
+  S.cc=[]; S.ch=[];
+  const dl=.35, be=.75;
+  for(const ch of set){
+    const tgt=Math.round(ch.rot/PI)*PI, whole=kind==='mei1';
+    let C,rot;
+    if(whole){
+      if(u<4){C=kf2(u,[[1,ch.home],[1.7,ch.paired],[2.4,ch.paired],[3,ch.plate]]);rot=kf(u,[[1,ch.rot],[1.7,.5],[2.4,.5],[3,0]]);}
+      else{const s=Math.sign(ch.plate[0]);C=[s*S.q+lerp(ch.plate[0],ch.e[0],g),lerp(ch.plate[1]*yc,ch.e[1],g)];rot=ch.jit*g;}
+    }else if(u<4){C=kf2(u,[[2,ch.home],[3,ch.plate]]);rot=kf(u,[[1.8,ch.rot],[3,tgt]]);}
+    if(C)C[0]+=jig*Math.sin(time*3+ch.id*2);
+    S.cc[ch.id]={C,rot};
+    for(const sg of[-1,1]){
+      const side=whole?Math.sign(ch.plate[0]):sg*Math.cos(tgt);
+      let P=C,r=rot;
+      if(!whole&&u>=4){P=[side*S.q+ch.e[0]*g,lerp(ch.plate[1]*yc,ch.e[1],g)];r=tgt+ch.jit*g;}
+      const o=rotv([sg*.022*bA,0],r);
+      const tx=whole?-side:-sg, v=whole?vAmt*.55:vAmt;
+      const dir=s=>{const x=lerp(sg*Math.sin(dl),tx*Math.cos(be),v),y=lerp(s*Math.cos(dl),s*Math.sin(be),v),n=Math.hypot(x,y);return[x/n,y/n];};
+      S.ch.push({x:P[0]+o[0],y:P[1]+o[1],rot:r,up:dir(-1),dn:dir(1),len:ch.len,cf:ch.cf,col:COL[ch.col],
+        tip:ch.tip[sg]?COL[ch.col==='m'?'p':'m']:null,alpha:sg>0?bA:1,side,seed:ch.id*7.3+sg*1.9,id:ch.id,sg});
+    }
+  }
+  return S;
+}
+
+function chromPts(cd,c,tt){
+  const lf=lerp(1.35,1,c),amp=(1-c)*.045,n=9,pts=[],cr=Math.cos(cd.rot),sr=Math.sin(cd.rot);
+  const mk=(dir,L,k,s)=>{const a=L*lf*k/n,w=s*amp*(Math.sin(a*26+cd.seed+tt)+.6*Math.sin(a*47+cd.seed*2.3-tt*.7))*Math.min(1,a/.04);
+    const lx=dir[0]*a-dir[1]*w,ly=dir[1]*a+dir[0]*w;return[cd.x+lx*cr-ly*sr,cd.y+lx*sr+ly*cr];};
+  for(let k=n;k>=0;k--)pts.push(mk(cd.up,cd.len*cd.cf,k,1));
+  for(let k=1;k<=n;k++)pts.push(mk(cd.dn,cd.len*(1-cd.cf),k,-1));
+  return pts;
+}
+function cellPath(ctx,d,r){
+  ctx.beginPath();
+  if(d<1e-4)ctx.arc(0,0,r,0,2*PI);
+  else if(d<r){const a=Math.acos(d/r);ctx.arc(-d,0,r,a,2*PI-a);ctx.arc(d,0,r,PI+a,3*PI-a);ctx.closePath();}
+  else{ctx.arc(-d,0,r,0,2*PI);ctx.moveTo(d+r,0);ctx.arc(d,0,r,0,2*PI);}
+}
+const strokePts=(ctx,pts,a,b)=>{ctx.beginPath();ctx.moveTo(pts[a][0],pts[a][1]);for(let i=a+1;i<=b;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.stroke();};
+
+function drawDivision(ctx,fr,S,o){
+  ctx.save();ctx.translate(fr.x,fr.y);ctx.rotate(fr.rot);ctx.scale(fr.s,fr.s);
+  const u=S.u,[cx,cy]=S.cen,glow=o.zoom*fr.s;
+  ctx.lineCap=ctx.lineJoin='round';
+  // membrane + cytoplasm
+  cellPath(ctx,S.d,S.r);
+  ctx.fillStyle='rgba(118,146,255,.10)';ctx.fill();
+  ctx.strokeStyle='rgba(150,172,255,.16)';ctx.lineWidth=.06;ctx.stroke();
+  ctx.strokeStyle='rgba(176,194,255,.7)';ctx.lineWidth=.013;ctx.stroke();
+  // nuclei
+  const nuc=(x,rad,envA,nlA)=>{
+    if(envA>.01){ctx.beginPath();ctx.arc(x,0,rad,0,2*PI);ctx.fillStyle=`rgba(126,150,255,${.11*envA})`;ctx.fill();
+      ctx.setLineDash(envA<.98?[.02+.1*envA,.09*(1-envA)]:[]);ctx.strokeStyle=`rgba(200,212,255,${.75*envA})`;ctx.lineWidth=.012;ctx.stroke();ctx.setLineDash([]);}
+    if(nlA>.01){ctx.beginPath();ctx.arc(x,0,rad*.18,0,2*PI);ctx.fillStyle=`rgba(214,222,255,${.4*nlA})`;ctx.fill();}
+  };
+  nuc(0,.48,S.envA,S.nlA);
+  for(const s of[-1,1])nuc(s*S.q,.48*SC,S.dEnvA,S.dNlA);
+  // spindle
+  if(S.polA>.01){ctx.strokeStyle=`rgba(${TUB},${.42*S.polA})`;ctx.lineWidth=.008;
+    for(let j=-2;j<=2;j++){ctx.beginPath();ctx.moveTo(-cx,cy);ctx.quadraticCurveTo(0,cy+j*.42*cx,cx,cy);ctx.stroke();}}
+  if(S.astA>.01){ctx.strokeStyle=`rgba(${TUB},${.5*S.astA})`;ctx.lineWidth=.007;
+    for(const s of[-1,1])for(let k=0;k<10;k++){const a=k*PI/5+.3;ctx.beginPath();ctx.moveTo(s*cx,cy);ctx.lineTo(s*cx+Math.cos(a)*.11*S.astA,cy+Math.sin(a)*.11*S.astA);ctx.stroke();}}
+  if(S.kA>.01){ctx.strokeStyle=`rgba(${TUB},${.85*S.kA})`;ctx.lineWidth=.011;
+    for(const cd of S.ch){ctx.beginPath();ctx.moveTo(cd.side*cx,cy);ctx.lineTo(lerp(cd.side*cx,cd.x,S.kA),lerp(cy,cd.y,S.kA));ctx.stroke();}}
+  if(o.labels&&S.plateA>.01){ctx.setLineDash([.03,.04]);ctx.strokeStyle=`rgba(233,237,249,${.45*S.plateA})`;ctx.lineWidth=.006;
+    ctx.beginPath();ctx.moveTo(0,-.86);ctx.lineTo(0,.86);ctx.stroke();ctx.setLineDash([]);}
+  // chromatids
+  const c=S.c,tt=o.time*.8*(1-c),w=lerp(.015,.056,c),n=9;
+  ctx.shadowBlur=glow*.05;
+  for(const cd of S.ch){
+    if(cd.alpha<.01)continue;
+    const pts=chromPts(cd,c,tt);
+    ctx.globalAlpha=cd.alpha*lerp(.62,1,c);ctx.lineWidth=w;ctx.strokeStyle=ctx.shadowColor=cd.col;
+    strokePts(ctx,pts,0,2*n);
+    if(cd.tip&&S.xo>.01){ctx.globalAlpha*=S.xo;ctx.strokeStyle=ctx.shadowColor=cd.tip;strokePts(ctx,pts,n+5,2*n);}
+    ctx.globalAlpha=cd.alpha*c*.75;ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(pts[n][0],pts[n][1],w*.3,0,2*PI);ctx.fill();ctx.shadowBlur=glow*.05;
+  }
+  ctx.globalAlpha=1;
+  // chiasmata while crossing over
+  const chi=k=>{const a=S.cc[k*2].C,b=S.cc[k*2+1].C,r=S.cc[k*2].rot,off=rotv([0,k?.09:.1],r);return[(a[0]+b[0])/2+off[0],(a[1]+b[1])/2+off[1]];};
+  if(S.kind==='mei1'&&S.xo>.01&&S.xo<.99){const a=Math.sin(S.xo*PI);ctx.fillStyle=ctx.shadowColor=ACT;ctx.shadowBlur=glow*.12;ctx.globalAlpha=a;
+    for(const k of[0,1]){const p=chi(k);ctx.beginPath();ctx.arc(p[0],p[1],.03+.02*a,0,2*PI);ctx.fill();}ctx.globalAlpha=1;}
+  // contractile ring
+  const h=S.d<S.r?Math.sqrt(S.r*S.r-S.d*S.d):0;
+  if(S.ringA>.01&&S.d<S.r){ctx.fillStyle=ctx.shadowColor=ACT;ctx.shadowBlur=glow*.08;ctx.globalAlpha=S.ringA;
+    for(const s of[-1,1]){ctx.beginPath();ctx.arc(0,s*h,.028,0,2*PI);ctx.fill();}ctx.globalAlpha=1;}
+  ctx.shadowBlur=0;
+  // centrosomes
+  ctx.fillStyle='#d9ffe0';for(const s of[-1,1]){ctx.beginPath();ctx.arc(s*cx,cy,.022,0,2*PI);ctx.fill();}
+
+  if(o.labels){
+    const m=ctx.getTransform(),P=(x,y)=>{const p=m.transformPoint(new DOMPoint(x,y));return[p.x,p.y];};
+    const L=(text,a,l,al=1)=>al>.02&&o.out.push({text,a:P(a[0],a[1]),l:P(l[0],l[1]),al});
+    const win=(a,b)=>kf(u,[[a-.15,0],[a,1],[b,1],[b+.15,0]]);
+    const of=(id,sg)=>S.ch.find(x=>x.id===id&&x.sg===sg);
+    const i0=S.set[0].id,i1=S.set[S.set.length-1].id, mei1=S.kind==='mei1';
+    L('jaderný obal',[-.37,-.31],[-.92,-.84],kf(u,[[1.9,1],[2.05,0]]));
+    L('jadérko',[-.05,.06],[-.98,.72],S.nlA);
+    L('chromatin',[S.set[1].home[0],S.set[1].home[1]],[.95,.74],kf(u,[[1.2,1],[1.4,0]]));
+    L('centrozom',[cx,cy],[cx+.3,cy-.36],kf(u,[[5.4,1],[5.7,0]]));
+    L('dělicí vřeténko',[-cx/2,-.31*cx],[-.62,-1.1],win(2.5,4.9));
+    L('ekvatoriální rovina',[0,.86],[.12,1.12],S.plateA);
+    if(mei1){
+      const p=chi(0),b=S.cc[0].C;
+      if(b){L('bivalent',[b[0]-.04,b[1]-.08],[-1.0,-.62],win(2.1,3.9));L('crossing-over',p,[1.0,.55],win(1.55,2.5));}
+      const a=of(1,1);L('celý chromozom, 2 chromatidy',[a.x,a.y],[a.x+.25,a.y-.7],win(4.25,5.2));
+    }else{
+      const a=of(i0,-1);L('sesterské chromatidy',[a.x,a.y-.05],[-1.02,-.66],win(2.3,3.9));
+      const b=of(i1,1);L('chromatida = už samostatný chromozom',[b.x,b.y],[b.x+.1,b.y+.75],win(4.25,5.2));
+    }
+    L('dělicí rýha',[0,-h],[.1,-h-.42],win(5.45,6.75)*(S.d<S.r?1:0));
+    L('nové jádro',[S.q+.2,.3],[S.q+.3,.95],kf(u,[[6.1,0],[6.4,1]]));
+  }
+  ctx.restore();
+}
+
+// ---------- timelines ----------
+const T=(name,kind,u0,u1,w,tip,desc)=>({name,kind,u0,u1,w,tip,desc});
+const MODES={
+ mitoza:[
+  T('Interfáze','mit',0,1,1.2,'Jedno velké jádro, chromozomy nejsou vidět.','Buňka roste a chystá se na dělení. V S-fázi zdvojí DNA, takže každý chromozom má pak dvě sesterské chromatidy. Chromatin je rozvolněný. Zdvojí se i centrozom.'),
+  T('Profáze','mit',1,2,1,'Chromozomy se zviditelňují, jádro ještě drží.','Chromatin se spiralizuje do krátkých tlustých chromozomů. Centrozomy se rozcházejí k opačným pólům a mezi nimi roste dělicí vřeténko. Jadérko mizí.'),
+  T('Prometafáze','mit',2,3,1,'Jaderný obal se rozpadá, chromozomy se hýbou ke středu.','Jaderný obal se rozpadne na váčky. Vlákna vřeténka se chytají kinetochorů na centromerách a tahají chromozomy do středu buňky.'),
+  T('Metafáze','mit',3,4,.8,'Chromozomy srovnané v jedné rovině uprostřed.','Chromozomy leží v ekvatoriální rovině. Každá chromatida je připojená k jinému pólu. Jsou teď nejkratší a nejlíp vidět, proto se z metafáze dělá karyotyp. Buňka čeká, dokud nejsou připojené všechny.'),
+  T('Anafáze','mit',4,5,1,'Dvě skupiny tvaru V putují od sebe.','Centromery se rozdělí a vlákna táhnou sesterské chromatidy k opačným pólům. Od této chvíle je každá chromatida samostatný chromozom, takže jich je na chvíli dvojnásobek. Buňka se protahuje.'),
+  T('Telofáze','mit',5,6,1,'U pólů vznikají dvě nová jádra.','Chromozomy u pólů se rozvolňují zpět na chromatin. Kolem obou skupin vzniká jaderný obal, vrací se jadérko a vřeténko zaniká.'),
+  T('Cytokineze','mit',6,7,1,'Buňka se zaškrcuje na dvě.','Dělí se cytoplazma. Živočišnou buňku zaškrtí prstenec z aktinu a myozinu, rostlinná staví od středu přepážku. Vzniknou dvě buňky 2n, geneticky shodné s tou původní.'),
+ ],
+ meioza:[
+  T('Interfáze','mei1',0,1,1,'Jedno velké jádro, chromozomy nejsou vidět.','Stejná příprava jako před mitózou. DNA se zdvojí jen teď, před prvním dělením. Před druhým už ne.'),
+  T('Profáze I','mei1',1,3,1.9,'Homologní chromozomy leží v párech těsně u sebe.','Chromozom od matky a jeho protějšek od otce se k sobě přiloží a vytvoří bivalent. Nesesterské chromatidy si při crossing-overu vymění úseky, tím vznikají nové kombinace alel. Je to nejdelší fáze meiózy. Na konci se rozpadá jaderný obal.'),
+  T('Metafáze I','mei1',3,4,.8,'Uprostřed leží páry chromozomů, ne jednotlivé chromozomy.','V ekvatoriální rovině stojí celé bivalenty. Který z páru se natočí ke kterému pólu, je náhoda. Tomu se říká nezávislá kombinace chromozomů.'),
+  T('Anafáze I','mei1',4,5,1,'K pólům jdou celé chromozomy tvaru X.','Rozcházejí se homologní chromozomy, každý pořád se dvěma chromatidami. Centromery se nedělí. Právě tady se počet chromozomů snižuje na polovinu.'),
+  T('Telofáze I','mei1',5,7,1.4,'Buňka se zaškrcuje, v každé polovině je půlka chromozomů.','Vzniknou dvě haploidní buňky. Každý chromozom má stále dvě chromatidy a díky crossing-overu už nejsou stejné. Následuje krátká pauza bez zdvojení DNA.'),
+  T('Profáze II','mei2',1,3,1.3,'Dvě buňky, v každé se znovu objevují chromozomy.','V obou buňkách se chromozomy znovu spiralizují, rozpadá se jaderný obal a staví se nové vřeténko, kolmo na to první.'),
+  T('Metafáze II','mei2',3,4,.8,'Dvě buňky, chromozomy jednotlivě v řadě.','Chromozomy se řadí do ekvatoriální roviny jednotlivě, stejně jako při mitóze. Jen jich je polovina.'),
+  T('Anafáze II','mei2',4,5,1,'Dvě buňky, v každé se rozcházejí chromatidy.','Teprve teď se dělí centromery. Sesterské chromatidy se rozcházejí k opačným pólům jako při mitóze.'),
+  T('Telofáze II','mei2',5,7,1.4,'Vznikají čtyři buňky.','Kolem čtyř skupin chromozomů vznikají jádra a buňky se zaškrtí. Výsledkem jsou čtyři haploidní buňky a každá je geneticky jiná. U živočichů z nich budou gamety, u rostlin spory.'),
+ ]};
+function stats(kind,u){
+  if(kind==='mit')return u<.5?[4,4,'2n']:u<4?[4,8,'2n']:u<6.5?[8,8,'2n + 2n']:[4,4,'2n'];
+  if(kind==='mei1')return u<.5?[4,4,'2n']:u<6.5?[4,8,'2n']:[2,4,'n'];
+  return u<4?[2,4,'n']:u<6.5?[4,4,'n + n']:[2,2,'n'];
+}
+
+// ---------- app ----------
+const $=id=>document.getElementById(id), cv=$('cv'), ctx=cv.getContext('2d');
+const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mode='mitoza',t=0,playing=false,time=0,segIdx=-1,quiz=null,lastStats='';
+const segs=()=>MODES[mode], total=()=>segs().reduce((a,s)=>a+s.w,0);
+function locate(tt){
+  let x=tt*total();const S=segs();
+  for(let i=0;i<S.length;i++){if(x<=S[i].w||i===S.length-1)return{i,seg:S[i],u:lerp(S[i].u0,S[i].u1,Math.min(1,x/S[i].w))};x-=S[i].w;}
+}
+const segStart=i=>segs().slice(0,i).reduce((a,s)=>a+s.w,0)/total();
+
+function render(){
+  const w=cv.width,h=cv.height,{seg,u}=locate(t),labels=$('labels').checked&&!quiz,m=labels?.5:.2;
+  let cells,ex,ey;
+  if(seg.kind==='mei2'){
+    const a=divState('mei2',u,SETS.mei2L,time),b=divState('mei2',u,SETS.mei2R,time+9);
+    cells=[[{x:-DX,y:0,rot:-PI/2,s:SC},a,labels],[{x:DX,y:0,rot:PI/2,s:SC},b,false]];
+    ex=DX+SC*a.r+m;ey=SC*(a.d+a.r)+m;
+  }else{const a=divState(seg.kind,u,SETS[seg.kind],time);cells=[[{x:0,y:0,rot:0,s:1},a,labels]];ex=a.d+a.r+m;ey=a.r+m;}
+  const tall=h>w*1.08; if(tall)[ex,ey]=[ey,ex];
+  const zoom=Math.min(w/2/ex,h/2/ey),out=[];
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,w,h);
+  ctx.translate(w/2,h/2);ctx.scale(zoom,zoom);if(tall)ctx.rotate(PI/2);
+  for(const[fr,S,lab]of cells)drawDivision(ctx,fr,S,{labels:lab,time,zoom,out});
+  ctx.setTransform(1,0,0,1,0,0);
+  const dpr=w/cv.clientWidth,fs=13*dpr;ctx.font=`500 ${fs}px Figtree,system-ui,sans-serif`;ctx.textBaseline='middle';
+  for(const l of out){
+    ctx.globalAlpha=l.al;ctx.strokeStyle='rgba(233,237,249,.5)';ctx.lineWidth=dpr;
+    ctx.beginPath();ctx.moveTo(l.a[0],l.a[1]);ctx.lineTo(l.l[0],l.l[1]);ctx.stroke();
+    ctx.fillStyle='#e9edf9';ctx.beginPath();ctx.arc(l.a[0],l.a[1],2.2*dpr,0,2*PI);ctx.fill();
+    const tw=ctx.measureText(l.text).width,right=l.l[0]>=l.a[0];
+    let x=right?l.l[0]+5*dpr:l.l[0]-5*dpr-tw;x=Math.max(6*dpr,Math.min(w-tw-6*dpr,x));
+    const y=Math.max(fs,Math.min(h-fs,l.l[1]));
+    ctx.fillStyle='rgba(5,7,13,.72)';ctx.fillRect(x-4*dpr,y-fs*.75,tw+8*dpr,fs*1.5);
+    ctx.fillStyle='#e9edf9';ctx.fillText(l.text,x,y);
+  }
+  ctx.globalAlpha=1;
+}
+
+function syncUI(){
+  const{i,seg,u}=locate(t);
+  if(i!==segIdx){segIdx=i;
+    $('count').textContent=`${mode==='mitoza'?'Mitóza':'Meióza'}, fáze ${i+1} z ${segs().length}`;
+    $('name').textContent=seg.name;$('tip').textContent=seg.tip;$('desc').textContent=seg.desc;
+    [...$('phases').children].forEach((b,k)=>{b.className=k<i?'past':k===i?'now':'';b.setAttribute('aria-current',k===i?'step':'false');});
+  }
+  const st=stats(seg.kind,u),key=st.join();
+  if(key!==lastStats){['nChr','nDna','nSet'].forEach((id,k)=>{const el=$(id);if(lastStats&&el.textContent!==String(st[k])){el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),700);}el.textContent=st[k];});lastStats=key;}
+  $('scrub').value=Math.round(t*1000);
+  $('playIcon').setAttribute('d',playing?'M3 2h4v14H3zM11 2h4v14h-4z':'M4 2l12 7-12 7z');
+  $('play').setAttribute('aria-label',playing?'Zastavit':'Přehrát');
+}
+function setT(x,keep){t=Math.max(0,Math.min(1,x));if(!keep)playing=false;syncUI();}
+function buildPhases(){
+  $('phases').innerHTML='';
+  segs().forEach((s,i)=>{const b=document.createElement('button');b.style.flex=s.w;b.title=s.name;b.innerHTML=`<span>${s.name}</span>`;b.onclick=()=>setT(segStart(i)+.0005);$('phases').append(b);});
+}
+function setMode(m){
+  mode=m;segIdx=-1;lastStats='';
+  $('m-mitoza').setAttribute('aria-pressed',m==='mitoza');$('m-meioza').setAttribute('aria-pressed',m==='meioza');
+  buildPhases();
+  if(quiz){quiz={score:0,total:0};nextQ();}else setT(0);
+}
+
+// quiz
+function nextQ(){
+  const S=segs();let i;do{i=Math.floor(Math.random()*S.length);}while(S.length>1&&i===quiz.i);
+  quiz.i=i;quiz.done=false;
+  t=segStart(i)+S[i].w/total()*(.35+Math.random()*.45);playing=false;
+  $('qMode').textContent=mode==='mitoza'?'Mitóza':'Meióza';
+  $('opts').innerHTML='';$('verdict').textContent='';$('next').hidden=true;
+  S.forEach((s,k)=>{const b=document.createElement('button');b.textContent=s.name;b.onclick=()=>answer(k,b);$('opts').append(b);});
+  $('score').textContent=quiz.total?`Správně ${quiz.score} z ${quiz.total}`:'';
+}
+function answer(k,btn){
+  if(quiz.done)return;quiz.done=true;quiz.total++;
+  const S=segs(),ok=k===quiz.i;if(ok)quiz.score++;
+  [...$('opts').children].forEach((b,j)=>{b.disabled=true;if(j===quiz.i)b.classList.add('ok');});
+  if(!ok)btn.classList.add('bad');
+  $('verdict').innerHTML=`<b>${ok?'Správně.':'Tohle je '+S[quiz.i].name.toLowerCase().replace(/ i+$/,x=>x.toUpperCase())+'.'}</b> Poznáš ji takhle: ${S[quiz.i].tip.replace(/^./,c=>c.toLowerCase())}`;
+  $('score').textContent=`Správně ${quiz.score} z ${quiz.total}`;$('next').hidden=false;$('next').focus();
+}
+function toggleQuiz(){
+  quiz=quiz?null:{score:0,total:0};
+  $('quiz').hidden=!quiz;$('learn').hidden=!!quiz;$('transport').hidden=!!quiz;
+  $('quizBtn').textContent=quiz?'Zpět k prohlížení':'Vyzkoušej mě';
+  if(quiz)nextQ();else{segIdx=-1;setT(t);}
+}
+
+$('m-mitoza').onclick=()=>setMode('mitoza');$('m-meioza').onclick=()=>setMode('meioza');
+$('scrub').oninput=e=>setT(e.target.value/1000);
+$('play').onclick=()=>{if(t>=1)t=0;playing=!playing;syncUI();};
+$('quizBtn').onclick=toggleQuiz;$('next').onclick=nextQ;
+addEventListener('keydown',e=>{if(e.code==='Space'&&!quiz&&!/BUTTON|INPUT/.test(e.target.tagName)){e.preventDefault();$('play').click();}});
+new ResizeObserver(()=>{const d=Math.min(devicePixelRatio||1,2);cv.width=cv.clientWidth*d;cv.height=cv.clientHeight*d;}).observe(cv);
+
+let last=performance.now();
+(function frame(now){
+  const dt=Math.min(.1,(now-last)/1000);last=now;if(!still)time+=dt;
+  if(playing){t+=dt/(total()*4.2);if(t>=1){t=1;playing=false;}syncUI();}
+  if(cv.width)render();
+  requestAnimationFrame(frame);
+})(last);
+setMode('mitoza');
+window.app={setT,setMode,stats,locate,toggleQuiz,MODES,divState,SETS};
+</script>
+</body>
+</html>
