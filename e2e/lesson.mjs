@@ -47,6 +47,18 @@ try {
         assert.ok(spots > 0, `${tr.id}: no numbered spots at the end of the track`)
       }
 
+      // touch: a vertical drag on the model tilts it and is never handed to the page; two fingers zoom
+      assert.equal(await page.evaluate(() => getComputedStyle(document.getElementById('cv')).touchAction), 'none')
+      const g = await page.evaluate(() => {
+        const cv = document.getElementById('cv'), r = cv.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2
+        const ev = (type, id, dx, dy) => cv.dispatchEvent(new PointerEvent(type, { pointerId: id, pointerType: 'touch', clientX: x + dx, clientY: y + dy, bubbles: true }))
+        const el0 = app.cam.el; ev('pointerdown', 11, 0, 0); ev('pointermove', 11, 0, 60); ev('pointerup', 11, 0, 60)
+        const el1 = app.cam.el; ev('pointerdown', 12, -40, 0); ev('pointerdown', 13, 40, 0); ev('pointermove', 13, 90, 0); ev('pointerup', 12, -40, 0); ev('pointerup', 13, 90, 0)
+        const z = app.cam.zoom; app.cam.zoom = 1; app.cam.el = el0
+        return { tilted: el1 - el0, zoom: z, scrollY }
+      })
+      assert.ok(g.tilted > .3 && g.zoom > 1.3 && g.scrollY === 0, 'touch gestures: ' + JSON.stringify(g))
+
       if (tag === 'desk') {
         const first = tracks[0]
         await page.evaluate((id) => app.setTrack(id), first.id)

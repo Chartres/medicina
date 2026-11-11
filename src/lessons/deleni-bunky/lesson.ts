@@ -1,7 +1,8 @@
 // Buněčný cyklus a dělení buněk — the texts, in the terms of the learner's workbook, and the wiring
 // of the cell model (model.js) to the kit.
 import { defineLesson, type Part, type SceneOut, type Step } from '../../kit/types.ts'
-import { hex, lerp } from '../../kit/math.ts'
+import { lerp } from '../../kit/math.ts'
+import { glass, pigments } from '../../kit/pigments.ts'
 import { drawCells, stats } from './model.js'
 import { meta } from './meta.ts'
 
@@ -53,6 +54,7 @@ const PARTS: Record<string, Part> = {
  chi:{n:10,name:'Crossing-over',what:'Nesesterské chromatidy se zlomí ve stejném místě a spojí se křížem. Vymění si tak úseky s geny od matky a od otce. Místu překřížení se říká chiasma.',deep:'Na každém páru proběhne zpravidla aspoň jedno překřížení, u člověka obvykle jedno až tři. Chiasmata zároveň drží homology pohromadě až do anafáze I.'},
 };
 
+const MEM = glass('mem', 'membrane'), NUC = glass('nuc', 'envelope')
 const FINDABLE = ['mem', 'obal', 'jad', 'chrom', 'cen', 'vret', 'rov', 'prst']
 
 export default defineLesson({
@@ -68,13 +70,9 @@ export default defineLesson({
     { id: 'nucleus', label: 'jádro' },
     { id: 'membrane', label: 'membrána' },
   ],
-  palette: {
-    // a stained preparation: carmine and Prussian blue for the two parental sets, sepia spindle
-    paper: { m: hex('#b3263c'), p: hex('#2a4b9b'), tub: hex('#7a6a2a'), act: hex('#c9781a'), cen: hex('#2c2a20'), kin: hex('#1c2230'), nl: hex('#8f86a8'),
-      mem: [.2, .3, .45], memP: [.012, .6], nuc: [.33, .27, .5], nucP: [.03, .6], plate: hex('#565b68') },
-    fluo: { m: hex('#ff5fa2'), p: hex('#4cc9ff'), tub: hex('#86f28f'), act: hex('#ffb347'), cen: hex('#d9ffe0'), kin: hex('#ffffff'), nl: hex('#aab4e0'),
-      mem: [.62, .7, 1], memP: [.012, .7], nuc: [.7, .76, 1], nucP: [.03, .6], plate: hex('#a0a8c2') },
-  },
+  // a stained preparation: carmine and Prussian blue for the two parental sets, sepia spindle
+  palette: pigments({ m: 'carmine', p: 'prussian', tub: 'sepia', act: 'ochre', cen: 'umber', kin: 'ink', nl: 'mauve', plate: 'slate' },
+    { paper: { ...MEM.paper, ...NUC.paper }, fluo: { ...MEM.fluo, ...NUC.fluo } }),
   findable: (track) => (track === 'meioza' ? [...FINDABLE, 'biv', 'chi'] : FINDABLE),
   scene(s, g) {
     const ph = MODES[s.track][s.step]
