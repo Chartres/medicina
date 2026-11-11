@@ -406,3 +406,26 @@ test('result line, path rule, narration shape, prompt placeholders', (t) => {
   assert.match(prompt, /LESSON_SLUG: <slug>/);
   assert.match(prompt, /LESSON_REJECT: /);
 });
+
+test('usage limit: the build pauses, keeps its box and session, waits for the reset, then carries on and publishes', async (t) => {
+  quiet(t);
+  const w = world(t, { rows: [row(), row()], session: (o, n) => {
+    if (n === 1) { put(path.join(o.cwd, 'src/lessons/fotosynteza/model.ts'), '// half done\n'); return { code: 1, result: "You've hit your 5-hour limit", limit: { resetsAt: Date.UTC(2026, 10, 11, 21, 0) } }; }
+    assert.ok(fs.existsSync(path.join(o.cwd, 'src/lessons/fotosynteza/model.ts')), 'the half-built lesson is still there');
+    writeLesson(o.cwd); return { code: 0, result: 'LESSON_SLUG: fotosynteza' };
+  } });
+  assert.equal(await w.go(), 0);
+  assert.deepEqual(w.seen.status.at(-1), { status: 'queued', note: "'Čeká na volnou kapacitu. Bude pokračovat samo.'", url: 'null', slug: undefined, id: ID });
+  assert.ok(fs.existsSync(w.box) && !fs.existsSync(w.wt));
+  assert.match(w.seen.notes.at(-1), /paused for the usage limit and continues by itself after 21:01 UTC/);
+  assert.ok(!w.seen.notes.at(-1).includes('IGNORE'));
+  assert.equal(await w.go(), 0); // ten minutes later: still before the reset
+  assert.equal(w.seen.sessions.length, 1);
+  w.clock.t = Date.UTC(2026, 10, 11, 21, 5);
+  assert.equal(await w.go(), 0);
+  assert.equal(w.seen.sessions[1].resume, true);
+  assert.equal(w.seen.sessions[1].sessionId, w.seen.sessions[0].sessionId);
+  assert.match(w.seen.sessions[1].prompt, /stopped part-way by a usage limit/);
+  assert.equal(statuses(w).at(-1), 'live');
+  assert.ok(!fs.existsSync(path.join(w.cfg.cache, 'resume', `${ID}.json`)));
+});
