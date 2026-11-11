@@ -3,24 +3,26 @@
 # requires-python = ">=3.11"
 # dependencies = ["mlx-whisper", "soundfile", "numpy"]
 # ///
-"""Narration for the deleni-bunky lesson: one clip per phase plus the start time of every word on the page.
+"""Narration for a lesson: one clip per step plus the start time of every word on the page.
 
-  node voice/dump.mjs && voice/build.py
+  node voice/dump.mjs <slug> && voice/build.py <slug>
 
-Voice: Piper cs_CZ-jirka-medium (local, CC0 dataset). Word times come from Whisper listening to
-the finished clip, matched back to the page's words; a word Whisper heard differently takes a
-time between its neighbours. Clips whose transcript matches under 70 % of the words fail loudly.
+Voice: Piper cs_CZ-jirka-medium (local, CC0 dataset; the .onnx and .onnx.json go in voice/models/).
+Word times come from Whisper listening to the finished clip, matched back to the page's words; a
+word Whisper heard differently takes a time between its neighbours. Clips whose transcript matches
+under 70 % of the words fail loudly. The contract test fails when the text changes after this ran.
 """
 import difflib, json, os, pathlib, re, subprocess, sys, tempfile, unicodedata
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 import mlx_whisper, soundfile as sf
 
 HERE = pathlib.Path(__file__).parent
-OUT = HERE.parent / "public/deleni-bunky/audio"
-MODEL = HERE / "models/cs_CZ-jirka-medium.onnx"
+# models live in the main checkout even when this runs from a git worktree
+MODELS = pathlib.Path(os.environ.get("MEDICINA_VOICE_MODELS", HERE / "models"))
+MODEL = MODELS / "cs_CZ-jirka-medium.onnx"
 # how to say what the page writes; one page word stays one entry
-SAY = {"I": "jedna", "II": "dvě", "G₁": "gé jedna", "G₂": "gé dvě", "G₀": "gé nula", "S": "es", "K₁": "ká jedna", "K₂": "ká dvě", "RNA": "er en á", "DNA": "dé en á", "S-fázi": "es fázi", "2n": "dvě en", "n": "en",
-       "crossing-overu": "krosing ouvru", "crossing-over": "krosing ouvr"}
+SAY = {"I": "jedna", "II": "dvě", "III": "tři", "DNA": "dé en á", "RNA": "er en á", "mRNA": "em er en á", "tRNA": "té er en á",
+       "rRNA": "er er en á", "ATP": "á té pé", "ADP": "á dé pé", "pH": "pé há", "CO₂": "cé ó dvě", "O₂": "ó dvě", "H₂O": "há dvě ó"}
 
 
 def spoken(word):
@@ -64,16 +66,21 @@ def clip(parts, dest):
 
 
 def main():
-    OUT.mkdir(parents=True, exist_ok=True)
+    if len(sys.argv) != 2:
+        sys.exit("usage: voice/build.py <slug>")
+    src = json.loads((HERE / "narration" / f"{sys.argv[1]}.json").read_text())
+    SAY.update(src["pronounce"])
+    out = HERE.parent / "public" / src["slug"] / "audio"
+    out.mkdir(parents=True, exist_ok=True)
     data, worst = {}, 1
-    for mode, clips in json.loads((HERE / "narration.json").read_text()).items():
-        data[mode] = []
+    for track, clips in src["tracks"].items():
+        data[track] = []
         for i, parts in enumerate(clips):
-            entry, hit = clip(parts, OUT / f"{mode}-{i}.m4a")
+            entry, hit = clip(parts, out / f"{track}-{i}.m4a")
             worst = min(worst, hit)
-            print(f"{mode}-{i}: {entry['dur']:.0f}s, {hit:.0%} matched", file=sys.stderr)
-            data[mode].append(entry)
-    (OUT / "timings.json").write_text(json.dumps(data, separators=(",", ":")))
+            print(f"{track}-{i}: {entry['dur']:.0f}s, {hit:.0%} matched", file=sys.stderr)
+            data[track].append(entry)
+    (out / "timings.json").write_text(json.dumps(data, separators=(",", ":")))
     print(f"ok, worst match {worst:.0%}")
 
 
