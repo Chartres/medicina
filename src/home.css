@@ -17,5 +17,6 @@ h2{font:500 13px/18px var(--sans);letter-spacing:.08em;text-transform:uppercase;
 .prog div{display:flex;flex-direction:column-reverse}
 .prog dt,.start{font:500 13px/18px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:0}
 .prog dd{margin:0;font:500 20px/26px var(--serif)}
+.fresh{font:500 13px/18px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .more{color:var(--mute);margin:24px 0 0}
 @media(max-width:700px){.lesson{grid-template-columns:1fr}.prog{grid-template-columns:repeat(3,auto)}}

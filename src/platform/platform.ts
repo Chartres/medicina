@@ -57,7 +57,7 @@ async function sync() {
 function render(host: HTMLElement) {
   if (!supabase) { host.hidden = true; return }
   host.innerHTML = userId
-    ? `<span class="acc-who" title="${email}">${email}</span><button class="acc-btn" data-acc="out">Odhlásit</button>`
+    ? `<span class="acc-who">${email.replace(/[&<>"]/g, '')}</span><button class="acc-btn" data-acc="out">Odhlásit</button>`
     : `<button class="acc-btn" data-acc="in">Přihlásit se</button>`
 }
 function dialog(): HTMLDialogElement {

@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "e2e": "npm run build && node e2e/lesson.mjs"
+    "e2e": "npm run build && node e2e/lesson.mjs && node e2e/requests.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0"
