@@ -59,7 +59,7 @@ function page(def, W) {
     <div class="stage">
       <canvas id="cv" role="img" aria-label="Prostorový model: ${esc(m.title)}"></canvas>
       <div id="spots"></div>
-      <p class="label hint" id="hint">Tažením model otočíš</p>
+      <p class="label hint" id="hint">Tažením otočíš, dvěma prsty přiblížíš</p>
     </div>
     <div class="transport" id="transport">
       <button id="play" aria-label="Přehrát"><svg viewBox="0 0 18 18"><path id="playIcon" d="M4 2l12 7-12 7z"/></svg></button>
@@ -159,7 +159,7 @@ export function mount(def, root, hooks = {}) {
 
   let track = def.tracks[0], step = 'explore', theme = 'paper', t = 0, playing = false, time = 0, segIdx = -1, lastNums = '', focus = null
   const layers = Object.fromEntries([...def.layers.map((l) => [l.id, true]), ['spots', true]])
-  const cam = { az: .15, el: .28, T: [0, 0, 0], D: 6, touched: false, goalAz: null }
+  const cam = { az: .15, el: .28, T: [0, 0, 0], D: 6, zoom: 1, touched: false, goalAz: null }
   let hot = [], task = null, queue = [], order = null, playlist = null
   const segs = () => track.steps, total = () => segs().reduce((a, s) => a + s.weight, 0)
   function locate(tt) {
@@ -182,7 +182,7 @@ export function mount(def, root, hooks = {}) {
     let c = { az: .45, el: .25, T: [0, 0, 0], D: fitD }
     if (!o.thumb) {
       const fp = focus && !P[focus].wide && out.hots.find((x) => parentOf(x[0]) === parentOf(focus))
-      const gT = fp ? fp[1] : [0, 0, 0], gD = fp ? Math.min(fitD, P[parentOf(focus)].zoom ?? 2.4) : fitD, k = o.snap || still ? 1 : 1 - Math.exp(-o.dt * 5)
+      const gT = fp ? fp[1] : [0, 0, 0], gD = (fp ? Math.min(fitD, P[parentOf(focus)].zoom ?? 2.4) : fitD) / cam.zoom, k = o.snap || still ? 1 : 1 - Math.exp(-o.dt * 5)
       cam.T = mix3(cam.T, gT, k); cam.D = lerp(cam.D, gD, k); c = cam; hot = out.hots
     }
     R.render(c, LOOKS[theme], tall)
@@ -227,7 +227,7 @@ export function mount(def, root, hooks = {}) {
     $('cardSubs').innerHTML = (s.subs || []).map(partBtn).join('')
   }
   function setFocus(id) {
-    focus = id; if (id) $('hint').hidden = true; $('pCard').hidden = !id; $('pExplore').hidden = !!id || step !== 'explore'; spotsKey = ''
+    focus = id; cam.zoom = 1; if (id) $('hint').hidden = true; $('pCard').hidden = !id; $('pExplore').hidden = !!id || step !== 'explore'; spotsKey = ''
     if (id) { emit('part/' + id); $('cardDeepBox').open = false; renderCard() }
   }
   root.addEventListener('click', (e) => { const b = e.target.closest('.parts button'); if (b) setFocus(b.dataset.id) })
@@ -399,10 +399,27 @@ export function mount(def, root, hooks = {}) {
   document.querySelectorAll('[name=theme]').forEach((r) => r.onchange = () => { theme = r.value; document.body.dataset.theme = theme; paintSwatches(); if (step === 'order') resetOrder() })
   document.querySelectorAll('[data-layer]').forEach((c) => c.onchange = () => { layers[c.dataset.layer] = c.checked; spotsKey = '' })
   addEventListener('keydown', (e) => { if (e.code === 'Space' && step === 'explore' && !track.still && !/BUTTON|INPUT|SUMMARY|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); $('play').click() } })
-  let drag = null
-  cv.onpointerdown = (e) => { drag = [e.clientX, e.clientY]; cam.touched = true; cam.goalAz = null; $('hint').hidden = true; cv.setPointerCapture(e.pointerId) }
-  cv.onpointermove = (e) => { if (!drag) return; cam.az += (e.clientX - drag[0]) * -.008; cam.el = Math.max(-1.3, Math.min(1.3, cam.el + (e.clientY - drag[1]) * .008)); drag = [e.clientX, e.clientY] }
-  cv.onpointerup = cv.onpointercancel = () => drag = null
+  // One finger (or the mouse) turns the model in both directions, two fingers zoom, a double tap resets the view.
+  // The canvas has touch-action: none, so a touch that starts on the model never scrolls the page.
+  const fingers = new Map(); let pinch = 0, lastTap = 0
+  const spread = () => { const [a, b] = [...fingers.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]) }
+  const setZoom = (z) => { cam.zoom = Math.max(.6, Math.min(3.2, z)) }
+  cv.onpointerdown = (e) => {
+    fingers.set(e.pointerId, [e.clientX, e.clientY]); cam.touched = true; cam.goalAz = null; $('hint').hidden = true
+    try { cv.setPointerCapture(e.pointerId) } catch { /* a pointer that is already gone */ }
+    if (fingers.size === 2) pinch = spread()
+    else if (e.timeStamp - lastTap < 320) { cam.goalAz = .5; cam.el = .28; cam.zoom = 1 }
+    lastTap = e.timeStamp
+  }
+  cv.onpointermove = (e) => {
+    const was = fingers.get(e.pointerId); if (!was) return
+    fingers.set(e.pointerId, [e.clientX, e.clientY])
+    if (fingers.size === 1) { cam.az += (e.clientX - was[0]) * -.008; cam.el = Math.max(-1.3, Math.min(1.3, cam.el + (e.clientY - was[1]) * .008)) }
+    else if (fingers.size === 2) { const d = spread(); if (pinch > 0) setZoom(cam.zoom * d / pinch); pinch = d }
+  }
+  cv.onpointerup = cv.onpointercancel = (e) => { fingers.delete(e.pointerId); pinch = 0 }
+  // a trackpad pinch arrives as ctrl+wheel; a plain wheel is left alone so the page keeps scrolling
+  cv.addEventListener('wheel', (e) => { if (!e.ctrlKey) return; e.preventDefault(); setZoom(cam.zoom * Math.exp(-e.deltaY * .01)) }, { passive: false })
   new ResizeObserver(() => { const d = Math.min(devicePixelRatio || 1, 2); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d }).observe(cv)
 
   let last = performance.now(), first = true;
