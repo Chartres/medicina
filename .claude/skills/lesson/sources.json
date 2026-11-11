@@ -1,0 +1,16 @@
+{
+  "about": "What the lesson skill is derived from. The builder hands the current text of every source to each build, and when a source changes it runs a session that brings SKILL.md back in line (builder/method.mjs). Private sources are read on Pavol's machine only and are never copied into this repository.",
+  "sources": [
+    { "id": "contract", "path": "src/kit/types.ts", "governs": "What a lesson must provide and what the kit gives it; every field is documented there." },
+    { "id": "rules", "path": "src/kit/contract.test.ts", "governs": "The checks every lesson must pass, as code." },
+    { "id": "pigments", "path": "src/kit/pigments.ts", "governs": "Model colours for both looks." },
+    { "id": "page", "path": "src/kit/kit.css", "governs": "The lesson page's tokens and type steps (lessons write no CSS)." },
+    { "id": "walk", "path": "e2e/lesson.mjs", "governs": "What the browser walk exercises and which screenshots it leaves." },
+    { "id": "signature", "path": "docs/SIGNATURE.md", "governs": "The teaching moves of this course and their status." },
+    { "id": "fw-signature", "path": "~/my-git/flywheel/docs/standards/signature.md", "private": true, "governs": "Where every product's signature comes from and what it refuses." },
+    { "id": "fw-taste", "path": "~/my-git/flywheel/docs/standards/taste.md", "private": true, "governs": "Voice, design and testing rules shared by every product." },
+    { "id": "fw-mobile", "path": "~/my-git/flywheel/docs/standards/mobile-ux.md", "private": true, "governs": "The phone contract." },
+    { "id": "voice", "path": "~/.claude/CLAUDE.md", "private": true, "from": "- **Voice:**", "to": "- **Anti-recency:**", "governs": "Pavol's voice and de-slop rules." },
+    { "id": "deslop", "path": "~/.claude/skills/deslop/SKILL.md", "private": true, "governs": "The de-slop scale for prose." }
+  ]
+}

@@ -13,6 +13,24 @@ You write three things: the texts, the parts, and a `scene()` function that draw
 page, the four lesson steps, the numbered spots, cards, camera, narration and progress are the kit's
 (`src/kit/`), and you do not touch them.
 
+## Sources of truth (read them every time; they win)
+
+This file is derived from other files and is kept in line with them automatically: `sources.json`
+next to it lists them, and when one changes the builder edits this skill to match
+(`builder/method.mjs`). Still, read the sources themselves before you build, because they are
+newer than any summary of them:
+
+- In this repository: `src/kit/types.ts` (the contract, a comment on every field),
+  `src/kit/contract.test.ts` (the rules, as code), `src/kit/pigments.ts` (model colours),
+  `docs/SIGNATURE.md` (the teaching moves), `e2e/lesson.mjs` (what the walk checks).
+- Pavol's central standards (voice, taste, signature, phone contract, de-slop). The builder puts
+  their current text in a folder it names in the prompt, with an `INDEX.md`. In an interactive
+  session on his machine the paths are in `sources.json`. They are private: follow them, never
+  quote them into the repository.
+
+Where a source and this file disagree, the source is right; build by the source and print
+`SKILL_STALE: <what differed>` at the end.
+
 ## 0. What you were given
 
 - A **request**: a topic, optional notes, optional photos of workbook pages, and a kind (`new` or
@@ -147,12 +165,16 @@ It draws with `g` and returns `{ extent, hots }`.
   visible; the third parameter number is intactness, below 1 the surface breaks into patches).
   Opaque things read as objects, glass reads as boundaries. Keep a frame under about 60 000
   vertices (a tube is points × sides × 6).
-- **Colour.** The paper look is a stained preparation: muted mineral pigments on warm paper, ink
-  outlines come from the kit. Pick 3–5 semantic colours and define both looks (`paper`, `fluo`)
-  with the same keys. Use `s.bg` to fade things back (`mix3(col, s.bg, .7)`).
+- **Colour.** Name your colours, do not invent them: `palette: pigments({ dna: 'prussian', enzyme:
+  'verdigris', … })` from `src/kit/pigments.ts` gives both looks at once (a stained preparation on
+  paper, fluorescent dyes on dark), and `glass()` gives membranes and envelopes. Use 3–5 pigments,
+  one meaning each; `ochre` is the accent for where something is happening right now. Use `s.bg`
+  to fade things back (`mix3(col, s.bg, .7)`). A lesson contains no CSS and no hex colours.
 - **Spots.** `hots` lists `[partId, position]` for every part present *now*. Put each spot on the
   part's surface facing outward, away from other spots. A part that is absent at this moment is
   simply not listed. Sub-parts are listed only when their parent (or a sibling) is `s.focus`.
+- **Touch.** The learner turns the model with one finger and zooms with two; the kit handles it.
+  Make the model worth turning: put things at different depths (z), not on one plane.
 - **Idle motion.** Only small, slow, meaningful motion from `s.time` (thermal jiggle of something
   loose). `time` is 0 for learners who asked for reduced motion; the model must still be right.
 - `findable(track)` lists the top-level parts that get a spot at some moment of that track.
