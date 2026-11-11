@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The lesson builder on the Mac mini: every 10 minutes, at most one request from the queue.
+     builder/install.sh substitutes @REPO@ (this checkout) and @HOME@ and loads the job.
+     A run that finds another build's lock, an empty queue or a spent daily budget exits at once. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.dravec.medicina-builder</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>cd @REPO@ &amp;&amp; node builder/run.mjs</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>600</integer>
+  <key>StandardOutPath</key>
+  <string>@HOME@/.cache/medicina-builder/logs/launchd.out</string>
+  <key>StandardErrorPath</key>
+  <string>@HOME@/.cache/medicina-builder/logs/launchd.err</string>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
