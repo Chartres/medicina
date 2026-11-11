@@ -1,12 +1,11 @@
-// Writes voice/narration.json from the page's own text, so audio and page cannot drift apart.
-import { createRequire } from 'node:module';
-import { writeFileSync } from 'node:fs';
-const require = createRequire(import.meta.url);
-const { chromium } = require('playwright');
-const root = new URL('..', import.meta.url).pathname;
-const b = await chromium.launch({ channel: 'chrome' }), p = await b.newPage();
-await p.goto('file://' + root + 'deleni-bunky/index.html');
-const out = await p.evaluate(() => Object.fromEntries(Object.entries(app.MODES).map(([m, s]) => [m, s.map(x => [x.name, x.tip, x.desc])])));
-writeFileSync(root + 'voice/narration.json', JSON.stringify(out, null, 1));
-await b.close();
-console.log(Object.values(out).flat().length, 'clips');
+// Writes voice/narration/<slug>.json from the lesson's own text, so audio and page cannot drift apart.
+//   node voice/dump.mjs <slug>          (Node ≥ 23 reads the .ts lesson directly)
+import { mkdirSync, writeFileSync } from 'node:fs'
+const slug = process.argv[2]
+if (!slug) { console.error('usage: node voice/dump.mjs <slug>'); process.exit(2) }
+const root = new URL('..', import.meta.url).pathname
+const def = (await import(`${root}src/lessons/${slug}/lesson.ts`)).default
+const out = { slug, pronounce: def.pronounce ?? {}, tracks: Object.fromEntries(def.tracks.map((t) => [t.id, t.steps.map((s) => [s.name, s.tip, s.desc])])) }
+mkdirSync(root + 'voice/narration', { recursive: true })
+writeFileSync(`${root}voice/narration/${slug}.json`, JSON.stringify(out, null, 1))
+console.log(Object.values(out.tracks).flat().length, 'clips')
