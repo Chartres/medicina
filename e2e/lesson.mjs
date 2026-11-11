@@ -25,6 +25,9 @@ try {
     mkdirSync(`${dir}shots/${slug}`, { recursive: true })
     for (const [tag, viewport] of [['desk', { width: 1360, height: 860 }], ['phone', { width: 390, height: 800 }]]) {
       const page = await browser.newPage({ viewport, deviceScaleFactor: 1 })
+      // A lesson under test is code nobody has read yet: it may talk to this run's own server and nothing else
+      // (not the web, and not other services listening on this machine).
+      await page.route((url) => url.origin !== `http://localhost:${PORT}` && url.protocol !== 'data:' && url.protocol !== 'blob:', (route) => route.abort())
       page.on('pageerror', (e) => errors.push(`${slug} ${tag}: ${e}`))
       page.on('console', (m) => m.type() === 'error' && !/font|ERR_|favicon/.test(m.text()) && errors.push(`${slug} ${tag}: ${m.text()}`))
       await page.goto(URL0 + slug + '/')

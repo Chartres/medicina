@@ -13,6 +13,24 @@ You write three things: the texts, the parts, and a `scene()` function that draw
 page, the four lesson steps, the numbered spots, cards, camera, narration and progress are the kit's
 (`src/kit/`), and you do not touch them.
 
+## Sources of truth (read them every time; they win)
+
+This file is derived from other files and is kept in line with them automatically: `sources.json`
+next to it lists them, and when one changes the builder edits this skill to match
+(`builder/method.mjs`). Still, read the sources themselves before you build, because they are
+newer than any summary of them:
+
+- In this repository: `src/kit/types.ts` (the contract, a comment on every field),
+  `src/kit/contract.test.ts` (the rules, as code), `src/kit/pigments.ts` (model colours),
+  `docs/SIGNATURE.md` (the teaching moves), `e2e/lesson.mjs` (what the walk checks).
+- Pavol's central standards (voice, taste, signature, phone contract, de-slop). The builder puts
+  their current text in a folder it names in the prompt, with an `INDEX.md`. In an interactive
+  session on his machine the paths are in `sources.json`. They are private: follow them, never
+  quote them into the repository.
+
+Where a source and this file disagree, the source is right; build by the source and print
+`SKILL_STALE: <what differed>` at the end.
+
 ## 0. What you were given
 
 - A **request**: a topic, optional notes, optional photos of workbook pages, and a kind (`new` or
@@ -147,12 +165,19 @@ It draws with `g` and returns `{ extent, hots }`.
   visible; the third parameter number is intactness, below 1 the surface breaks into patches).
   Opaque things read as objects, glass reads as boundaries. Keep a frame under about 60 000
   vertices (a tube is points × sides × 6).
-- **Colour.** The paper look is a stained preparation: muted mineral pigments on warm paper, ink
-  outlines come from the kit. Pick 3–5 semantic colours and define both looks (`paper`, `fluo`)
-  with the same keys. Use `s.bg` to fade things back (`mix3(col, s.bg, .7)`).
+- **Colour.** Name your colours, do not invent them: `palette: pigments({ dna: 'prussian', enzyme:
+  'verdigris', … })` from `src/kit/pigments.ts` gives both looks at once (a stained preparation on
+  paper, fluorescent dyes on dark), and `glass()` gives membranes and envelopes. Use 3–5 pigments,
+  one meaning each; `ochre` is the accent for where something is happening right now. Use `s.bg`
+  to fade things back (`mix3(col, s.bg, .7)`). A lesson contains no CSS and no hex colours.
 - **Spots.** `hots` lists `[partId, position]` for every part present *now*. Put each spot on the
   part's surface facing outward, away from other spots. A part that is absent at this moment is
   simply not listed. Sub-parts are listed only when their parent (or a sibling) is `s.focus`.
+- **Touch.** The learner turns the model with one finger and zooms with two; the kit handles it.
+  Make the model worth turning: put things at different depths (z), not on one plane.
+- **A lesson is pure.** Lesson files import only from `../../kit/` and from their own folder, and
+  never touch the page, the network or storage (`document`, `window`, `fetch`, `localStorage`…);
+  the contract test refuses them. Everything the learner sees outside the model is the kit's.
 - **Idle motion.** Only small, slow, meaningful motion from `s.time` (thermal jiggle of something
   loose). `time` is 0 for learners who asked for reduced motion; the model must still be right.
 - `findable(track)` lists the top-level parts that get a spot at some moment of that track.
@@ -173,13 +198,13 @@ Then **look at the screenshots** (`shots/<slug>/desk-<track>-<i>.png`, `phone-�
 see what the `tip` says? Is anything overlapping, clipped, lost against the background, or
 misleading? Would a student mistake this step for its neighbour? Fix the model, not the text.
 
-Then have the content attacked. Start one subagent whose only job is to **refute** the lesson:
-give it `src/lessons/<slug>/lesson.ts` and the workbook photos, and ask for every claim that is
-false, misleading, unsupported, or differs from the workbook, with a source and a corrected Czech
-sentence of the same length and level, and for anything the model would teach wrongly. It must
-check numbers, absolutes, causal "protože", etymologies and history against sources (web search).
-Apply what it proves; where you disagree, the workbook and a named source decide. Re-run the
-checks.
+Then have the content attacked: every claim that is false, misleading, unsupported, or differs
+from the workbook gets a source and a corrected Czech sentence of the same length and level, and
+so does anything the model would teach wrongly. Check numbers, absolutes, causal "protože",
+etymologies and history against sources (web search). In an interactive session give this to a
+subagent whose only job is to refute the lesson; where subagents are not available, do it yourself
+as a separate pass with that single aim. Apply what is proven; where there is doubt, the workbook
+and a named source decide. Re-run the checks.
 
 `facts.test.ts` must pin at least five facts with known answers that an exam would ask (counts,
 orders, what is where when), asserted against your model's own state and `numbers()`, so that a
@@ -188,19 +213,26 @@ later change cannot quietly make the lesson wrong.
 ## 8. Narration, thumbnail, commit
 
 ```
-node voice/dump.mjs <slug> && voice/build.py <slug>     # Czech voice; fails if a clip is unintelligible
+node voice/dump.mjs <slug> && voice/build.py <slug>     # Czech voice, sentence by sentence; fails if a sentence is unintelligible
 cp shots/<slug>/nahled.png public/<slug>/nahled.png
 npm test && npm run build && node e2e/lesson.mjs <slug>  # the contract now also checks narration matches the text
 ```
 
-Any later change to a step's `name`, `tip` or `desc` means running the narration again.
+Any later change to a step's `name`, `tip` or `desc` means running the narration again. Write for
+the ear as well as the eye: the narration reads the name, the tip and the description sentence by
+sentence, so a sentence that is hard to say aloud is too long.
 
-Commit only the lesson's files, with a message that says what the lesson covers. Do not push, open
-a pull request, or touch anything outside the lesson's paths. End by printing exactly one line:
+Commit only the lesson's files, with a message that says what the lesson covers. Do not push or
+open a pull request. End by printing exactly one line:
 
 ```
 LESSON_SLUG: <slug>
 ```
+
+**When the builder runs you** (its prompt says so) there is no browser, no audio and no git for
+you: run typecheck, tests and build, do the attack pass yourself, and end with the `LESSON_SLUG`
+line. The builder then makes the narration, runs the walk-through, and calls you again with the
+check report or with the screenshots to look at. It commits and publishes; you never do.
 
 ## Revising a lesson
 

@@ -1,0 +1,11 @@
+# A lesson is code that may have been built without a person reading it. It can run only scripts served
+# from this site and talk only to this site and to the sign-in project, so a bad lesson has nowhere
+# to send what it could read. Inline scripts (and inline event handlers in lesson HTML) do not run.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://chgwirzbpspoaoposuwg.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# the first, self-contained version of the cell lesson has its script inline
+/deleni-bunky/v1/*
+  ! Content-Security-Policy
