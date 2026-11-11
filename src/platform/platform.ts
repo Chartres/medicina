@@ -13,6 +13,13 @@ try { progress = parse(JSON.parse(localStorage.getItem(KEY) ?? 'null')) } catch 
 let userId: string | null = null, email = '', timer = 0
 const listeners = new Set<(p: Progress) => void>()
 
+// Who is signed in, for modules outside this file (members.ts, requests.ts). Called now and on every auth event.
+export { supabase }
+export type User = { id: string; email: string }
+const userListeners = new Set<(u: User | null) => void>()
+const currentUser = (): User | null => (userId ? { id: userId, email } : null)
+export function onUser(fn: (u: User | null) => void) { userListeners.add(fn); fn(currentUser()) }
+
 export const getProgress = () => progress
 export function onProgress(fn: (p: Progress) => void) { listeners.add(fn); fn(progress) }
 function changed() {
@@ -109,6 +116,7 @@ export function initPlatform() {
     userId = session?.user.id ?? null; email = session?.user.email ?? ''
     fw.identify(userId)
     render(host)
+    userListeners.forEach((fn) => fn(currentUser()))
     if (userId && !was) { if (event === 'SIGNED_IN') fw.track('signup_completed'); void sync() }
   })
 }

@@ -1,0 +1,53 @@
+/* Lekce na přání. Uses the page tokens (--bg --ink --mute --line --fill --serif --sans), so it
+   follows the home page and both themes of a lesson page.
+   Type: Title 20/26 Fraunces · Body 17/26 Figtree · Label 13/18 uppercase. Nothing smaller. */
+.rq{font:17px/26px var(--sans);color:var(--ink)}
+.rq[hidden],.rq [hidden]{display:none}
+section.rq{margin-top:56px}
+section.rq>:not(h2){max-width:600px}
+.rq h2,.rq h3,.rq-form label,.rq-label,.rq-meta{font:500 13px/18px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.rq h2{margin:0 0 12px;padding-top:16px;border-top:1px solid var(--line)}
+.rq h3{margin:40px 0 0}
+.rq p{margin:0}
+.rq p.rq-lede{margin-bottom:8px}
+
+.rq-form{display:grid;gap:8px}
+.rq-form label,.rq-label{margin-top:16px}
+.rq-form label span,.rq-label span{letter-spacing:.08em;margin-left:8px}
+.rq-form input[type=text],.rq-form textarea{font:17px/26px var(--sans);color:var(--ink);background:var(--fill);border:0;border-radius:4px;width:100%;min-height:48px;padding:11px 14px;margin:0}
+.rq-form textarea{resize:vertical;min-height:126px;display:block}
+.rq-form input[type=text]:focus-visible,.rq-form textarea:focus-visible{outline:2px solid var(--ink);outline-offset:0}
+
+/* photos: the native picker is kept for the keyboard and screen readers, its label is what shows */
+.rq-photos{display:grid;gap:8px;justify-items:start;position:relative}
+.rq-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip-path:inset(50%)}
+.rq-btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:0;border-radius:4px;background:var(--fill);color:var(--ink);font:17px/26px var(--sans);letter-spacing:0;text-transform:none;cursor:pointer;margin:0}
+.rq-form label.rq-btn{font:17px/26px var(--sans);letter-spacing:0;text-transform:none;color:var(--ink);margin:0}
+.rq-file:focus-visible+.rq-btn{outline:2px solid var(--ink);outline-offset:3px}
+.rq-file:disabled+.rq-btn{display:none}
+.rq-files{list-style:none;margin:0;padding:0;display:grid;gap:8px;justify-self:stretch}
+.rq-files:empty{display:none}
+.rq-files li{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center}
+.rq-files img{width:48px;height:64px;object-fit:cover;border-radius:4px;background:var(--fill);display:block}
+
+.rq-slab{justify-self:start;margin-top:24px;border:0;border-radius:4px;background:var(--ink);color:var(--bg);font:600 17px/26px var(--sans);min-height:48px;padding:0 22px;cursor:pointer}
+.rq-slab:disabled{opacity:.55;cursor:default}
+.rq-msg:empty,.rq-cap:empty{display:none}
+.rq p.rq-msg,.rq p.rq-cap{margin-top:8px}
+
+.rq-list{list-style:none;margin:0;padding:0}
+.rq-list li{display:grid;gap:4px;padding:16px 0;border-bottom:1px solid var(--line)}
+.rq-list strong{font:500 20px/26px var(--serif);overflow-wrap:anywhere}
+.rq-meta{display:flex;flex-wrap:wrap;gap:0 16px}
+.rq-meta b{font-weight:600;color:var(--ink)}
+.rq-list p{overflow-wrap:anywhere}
+.rq-list a{justify-self:start;display:inline-flex;align-items:center;min-height:44px;color:var(--ink);text-underline-offset:4px;text-decoration-thickness:1px}
+.rq-failed{padding:16px 0 0}
+.rq-live{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+
+/* lesson page: the same form in a dialog */
+dialog.rq-dialog{border:0;border-radius:6px;padding:24px;background:var(--bg);width:min(92vw,520px);max-height:92vh;overflow:auto}
+dialog.rq-dialog::backdrop{background:rgb(0 0 0/.45)}
+.rq-dialog h2{border:0;padding:0;margin:0 0 4px}
+.rq p.rq-which{font:500 20px/26px var(--serif);margin-bottom:12px}
+.rq-close{margin-top:16px}
