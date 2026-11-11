@@ -41,7 +41,8 @@ async function open({ signedIn = true, member = true, requests = [], viewport = 
   page.on('pageerror', (e) => errors.push(String(e)))
   page.on('console', (m) => m.type() === 'error' && !/font|ERR_|Failed to load resource/.test(m.text()) && errors.push(m.text()))
   await page.clock.install({ time: new Date('2026-11-11T19:00:00Z') })
-  if (signedIn) await page.addInitScript((s) => localStorage.setItem('sb-stub-auth-token', JSON.stringify(s)), session)
+  // only in the page itself: the lesson frame is sandboxed and has no storage to plant anything in
+  if (signedIn) await page.addInitScript((s) => { if (window.top === window) localStorage.setItem('sb-stub-auth-token', JSON.stringify(s)) }, session)
   await page.route(API + '/**', async (route) => {
     const req = route.request(), url = new URL(req.url()), method = req.method()
     const json = (status, body) => route.fulfill({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
@@ -287,6 +288,12 @@ try {
     assert.deepEqual(await keyActions(db), [{ action: 'lesson_request', kind: 'revise' }])
     await d.getByRole('button', { name: 'Zavřít' }).click()
     await page.locator('dialog.rq-dialog').waitFor({ state: 'detached' })
+    // on a lesson page the button lives inside the sandboxed lesson and the form opens on the page around it
+    await page.goto(HOME + 'deleni-bunky/')
+    const lesson = page.frame({ url: /model\.html/ }) ?? await page.waitForEvent('framenavigated', (f) => /model\.html/.test(f.url()))
+    await lesson.locator('#reviseBtn').click({ timeout: 20000 })
+    await page.locator('dialog.rq-dialog').getByLabel('Co upravit').waitFor()
+    assert.equal(await lesson.locator('dialog').count(), 0)
     await close()
   })
 

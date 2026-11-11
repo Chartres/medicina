@@ -28,8 +28,7 @@ const put = (file, text = 'x') => { fs.mkdirSync(path.dirname(file), { recursive
 
 // A lesson as the session would leave it in its box.
 const writeLesson = (box, slug = 'fotosynteza') => {
-  put(path.join(box, slug, 'index.html'), '<!doctype html><title>Fotosyntéza</title>');
-  put(path.join(box, 'src/lessons', slug, 'meta.ts'), "export const meta = { slug: 'fotosynteza', title: 'Fotosyntéza', order: 2 }\n");
+  put(path.join(box, 'src/lessons', slug, 'meta.json'), JSON.stringify({ slug: 'fotosynteza', title: 'Fotosyntéza', order: 2 }));
   put(path.join(box, 'src/lessons', slug, 'lesson.ts'), 'export default {}\n');
   put(path.join(box, 'public', slug, 'nahled.png'), 'png');
 };
@@ -43,8 +42,8 @@ function world(t, s = {}) {
   put(path.join(seed, 'package.json'), '{}');
   put(path.join(seed, 'e2e/lesson.mjs'), '// trusted');
   put(path.join(seed, 'src/platform/platform.ts'), '// shared');
-  put(path.join(seed, 'src/lessons/deleni-bunky/meta.ts'), "export const meta = { title: 'Dělení buňky' }\n");
-  put(path.join(seed, 'deleni-bunky/index.html'), '<title>old</title>');
+  put(path.join(seed, 'src/lessons/deleni-bunky/meta.json'), JSON.stringify({ title: 'Dělení buňky' }));
+  put(path.join(seed, 'public/deleni-bunky/nahled.png'), 'old');
   sh(seed, 'git', 'init', '--quiet', '-b', 'main');
   sh(seed, 'git', 'add', '-A');
   sh(seed, 'git', 'commit', '--quiet', '-m', 'seed');
@@ -193,7 +192,7 @@ test('happy path: a new lesson is built, checked, merged after green checks, ver
   // the pushed commit holds lesson files only
   const pushed = sh(w.origin, 'git', 'diff', '--name-only', 'main', `lesson/${SHORT}`).split('\n');
   assert.deepEqual(outside(pushed, 'fotosynteza'), []);
-  assert.ok(pushed.includes('fotosynteza/index.html') && pushed.includes('public/fotosynteza/audio/timings.json') && pushed.includes('public/fotosynteza/build.json') && pushed.includes('voice/narration/fotosynteza.json'));
+  assert.ok(pushed.includes('src/lessons/fotosynteza/meta.json') && pushed.includes('public/fotosynteza/audio/timings.json') && pushed.includes('public/fotosynteza/build.json') && pushed.includes('voice/narration/fotosynteza.json'));
   assert.match(sh(w.origin, 'git', 'log', '-1', '--format=%B', `lesson/${SHORT}`), /^Lekce: Fotosyntéza\n[^]*Co-Authored-By: Claude <noreply@anthropic\.com>$/);
   // pull request, then checks, then merge: in that order, squash, never --auto
   const gh = w.names('gh pr');
@@ -343,7 +342,7 @@ test('revise: only the named lesson, and it must exist', async (t) => {
   assert.match(other.seen.notes[0], /failed at "session"/);
   const ok = world(t, {
     rows: [row({ kind: 'revise', lesson_slug: 'deleni-bunky' })],
-    session: (o) => { put(path.join(o.cwd, 'deleni-bunky/index.html'), '<title>new</title>'); return { code: 0, result: 'LESSON_SLUG: deleni-bunky' }; },
+    session: (o) => { put(path.join(o.cwd, 'src/lessons/deleni-bunky/lesson.ts'), '// revised\n'); return { code: 0, result: 'LESSON_SLUG: deleni-bunky' }; },
     run: (line, o) => {
       if (line === 'box: node voice/dump.mjs deleni-bunky') return put(path.join(o.cwd, 'voice/narration/deleni-bunky.json'), JSON.stringify({ slug: 'deleni-bunky', tracks: {} })), { code: 0, out: '' };
       if (line.startsWith('voice/build.py') || line.startsWith('node e2e')) return { code: 0, out: '' };
@@ -392,7 +391,8 @@ test('result line, path rule, narration shape, prompt placeholders', (t) => {
   assert.deepEqual(parseVerdict('LESSON_SLUG: a-b-c\nlater\n`LESSON_REJECT: Ne.`'), { reject: 'Ne.' });
   assert.equal(parseVerdict('I will print LESSON_SLUG: x later'), null);
   assert.equal(parseVerdict(null), null);
-  assert.deepEqual(outside(['abc/index.html', 'src/lessons/abc/lesson.ts', 'public/abc/a/b.m4a', 'voice/narration/abc.json'], 'abc'), []);
+  assert.deepEqual(outside(['src/lessons/abc/lesson.ts', 'src/lessons/abc/meta.json', 'public/abc/a/b.m4a', 'voice/narration/abc.json'], 'abc'), []);
+  assert.deepEqual(outside(['abc/index.html'], 'abc'), ['abc/index.html']); // a lesson brings no page of its own
   assert.deepEqual(outside(['abcd/x', 'src/lessons/abc.ts', 'src/lessons/index.ts', 'voice/narration/abc.json.bak', 'voice/build.py', 'public/abcd/x', 'vite.config.ts'], 'abc').length, 7);
   const n = (o) => JSON.stringify({ slug: 'abc', pronounce: {}, tracks: { a: [['x', 'y']] }, ...o });
   validNarration(n(), 'abc');

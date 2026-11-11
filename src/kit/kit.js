@@ -42,11 +42,10 @@ function page(def, W) {
   const m = def.meta, many = def.tracks.length > 1
   return `
 <header>
-  <div class="crumb"><a class="label" href="/">Na medicínu</a><h1>${esc(m.title)}</h1></div>
+  <div class="crumb"><h1>${esc(m.title)}</h1></div>
   <div class="seg" id="tracks" role="group" aria-label="Část lekce"${many ? '' : ' hidden'}>
     ${def.tracks.map((t) => `<button data-track="${t.id}" aria-pressed="false">${esc(t.name)}</button>`).join('')}
   </div>
-  <div id="account"></div>
   <nav class="seg steps" role="tablist" aria-label="Postup učení">
     <button role="tab" data-step="explore" aria-selected="true">Prohlížej</button>
     <button role="tab" data-step="find" aria-selected="false">Najdi</button>
@@ -147,7 +146,7 @@ function page(def, W) {
 </section>`
 }
 
-/** Build the lesson page in `root` and start it. `hooks.emit(key)` is called for everything the learner does. */
+/** Build the lesson page in `root` and start it. `hooks.emit(key)` is called for everything the learner does, `hooks.onTheme(look)` when the look changes. */
 export function mount(def, root, hooks = {}) {
   const W = { ...WORDS, ...(def.words || {}) }
   root.insertAdjacentHTML('afterbegin', page(def, W))
@@ -396,7 +395,7 @@ export function mount(def, root, hooks = {}) {
     syncUI()
   }
   $('showAns').onclick = () => { $('ans').hidden = false; $('showAns').hidden = true; emit(`ans/${track.id}/${segIdx}`) }
-  document.querySelectorAll('[name=theme]').forEach((r) => r.onchange = () => { theme = r.value; document.body.dataset.theme = theme; paintSwatches(); if (step === 'order') resetOrder() })
+  document.querySelectorAll('[name=theme]').forEach((r) => r.onchange = () => { theme = r.value; document.body.dataset.theme = theme; hooks.onTheme?.(theme); paintSwatches(); if (step === 'order') resetOrder() })
   document.querySelectorAll('[data-layer]').forEach((c) => c.onchange = () => { layers[c.dataset.layer] = c.checked; spotsKey = '' })
   addEventListener('keydown', (e) => { if (e.code === 'Space' && step === 'explore' && !track.still && !/BUTTON|INPUT|SUMMARY|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); $('play').click() } })
   // One finger (or the mouse) turns the model in both directions, two fingers zoom, a double tap resets the view.

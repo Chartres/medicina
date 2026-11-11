@@ -4,7 +4,8 @@ import { defineLesson, type Part, type SceneOut, type Step } from '../../kit/typ
 import { lerp } from '../../kit/math.ts'
 import { glass, pigments } from '../../kit/pigments.ts'
 import { drawCells, stats } from './model.js'
-import { meta } from './meta.ts'
+import type { Meta } from '../../kit/types.ts'
+import meta from './meta.json' with { type: 'json' }
 
 type Kind = 'mit' | 'mei1' | 'mei2'
 type Phase = Step & { kind: Kind; u0: number; u1: number }
@@ -58,7 +59,7 @@ const MEM = glass('mem', 'membrane'), NUC = glass('nuc', 'envelope')
 const FINDABLE = ['mem', 'obal', 'jad', 'chrom', 'cen', 'vret', 'rov', 'prst']
 
 export default defineLesson({
-  meta,
+  meta: meta as Meta,
   tracks: [
     { id: 'mitoza', name: 'Mitóza', label: 'Buněčný cyklus', steps: MODES.mitoza },
     { id: 'meioza', name: 'Meióza', label: 'Meióza', steps: MODES.meioza.map((s) => ({ ...s, short: s.name.replace('fáze', '') })) },
