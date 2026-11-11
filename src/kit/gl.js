@@ -45,6 +45,19 @@ export function createDraw() {
       for (let k = 0; k < sides; k++) { const k2 = (k + 1) % sides; pv(A[k][0], A[k][1], ca); pv(A[k2][0], A[k2][1], ca); pv(C[k2][0], C[k2][1], cb); pv(A[k][0], A[k][1], ca); pv(C[k2][0], C[k2][1], cb); pv(C[k][0], C[k][1], cb) }
     }
   }
+  // an ellipsoid from its centre and three semi-axis vectors (they set size and orientation)
+  d.ellipsoid = (c, ax, ay, az, col) => {
+    const l2 = (v) => v[0] * v[0] + v[1] * v[1] + v[2] * v[2] || 1, la = l2(ax), lb = l2(ay), lc = l2(az)
+    for (const s of SPH) pv([c[0] + s[0] * ax[0] + s[1] * ay[0] + s[2] * az[0], c[1] + s[0] * ax[1] + s[1] * ay[1] + s[2] * az[1], c[2] + s[0] * ax[2] + s[1] * ay[2] + s[2] * az[2]],
+      norm([s[0] * ax[0] / la + s[1] * ay[0] / lb + s[2] * az[0] / lc, s[0] * ax[1] / la + s[1] * ay[1] / lb + s[2] * az[1] / lc, s[0] * ax[2] / la + s[1] * ay[2] / lb + s[2] * az[2] / lc]), col)
+  }
+  // a flat strip between two lines of points (a sheet, a ribbon, one face of a membrane); lit from both sides
+  d.sheet = (a, b, col) => {
+    for (let i = 0; i < Math.min(a.length, b.length) - 1; i++) {
+      const n = norm(cross(sub(a[i + 1], a[i]), sub(b[i], a[i]))), c = typeof col === 'function' ? col(i) : col
+      pv(a[i], n, c); pv(a[i + 1], n, c); pv(b[i + 1], n, c); pv(a[i], n, c); pv(b[i + 1], n, c); pv(b[i], n, c)
+    }
+  }
   d.glassSphere = (c, r, col, par, inner = true) => glassAdd(col, par, inner, () => { for (const s of SPHG) gv([c[0] + s[0] * r, c[1] + s[1] * r, c[2] + s[2] * r], s) })
   d.glassRevolve = (X, Xd, prof, col, par, inner = false) => glassAdd(col, par, inner, () => {
     const NS = 44, NA = 30, rows = []

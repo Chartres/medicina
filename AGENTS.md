@@ -57,10 +57,12 @@ FLYWHEEL-STANDARD §5) · portfolio record updated (stage/gate/links) · storefr
 
 ## How this repo is laid out
 
-- A lesson is one self-contained page: `<slug>/index.html` (model, text and script inline) plus assets in `public/<slug>/`. It must keep working opened straight from disk.
-- `src/lesson.ts` gives a lesson sign-in and progress. The lesson reports what the learner did with `emit('<kind>/<what>')` and declares every possible mark in `manifest()`; the platform counts progress from that.
-- `src/platform/` is shared: `progress.ts` (marks, merge by union, tested), `platform.ts` (account control, cloud sync to the fleet `progress` table with app = `medicina`, analytics).
-- `src/lessons.ts` lists live lessons for the home page; add the lesson's page to `vite.config.ts` as well.
-- Narration: `node voice/dump.mjs && voice/build.py` after any change to a phase's name, tip or description.
-- The lesson text follows the daughter's workbook (terms, number of phases, checkpoints K₁/K₂). When the workbook and a university textbook differ, the workbook's version leads and the other is mentioned.
+- **A lesson** is content plus one pure `scene()` function: `src/lessons/<slug>/{meta.ts, lesson.ts, …}`, a page stub `<slug>/index.html`, and static files in `public/<slug>/`. To build or revise one, follow `.claude/skills/lesson/SKILL.md` (the method, binding).
+- **The kit** (`src/kit/`) is everything a lesson does not write: `types.ts` (the contract), `kit.js` (page, the four lesson steps, spots, cards, narration), `gl.js` (renderer), `start.ts` (wires a lesson to the platform), `contract.test.ts` (checks every lesson against the contract and the house rules, no browser).
+- **The platform** (`src/platform/`) is shared by all pages: `progress.ts` (marks, merge by union), `platform.ts` (account control, cloud sync to the fleet `progress` table with app = `medicina`, analytics).
+- **Home** lists lessons from every `src/lessons/*/meta.ts`; `access: 'premium'` lessons are listed for members only until Pavol has read them.
+- **Checks:** `npm test` (contract over all lessons, each lesson's fact tests, platform) and `node e2e/lesson.mjs <slug>` (generic walk in Chrome; writes `shots/<slug>/`, which must be looked at).
+- **Narration:** `node voice/dump.mjs <slug> && voice/build.py <slug>` after any change to a step's name, tip or description; the contract test fails when it is stale.
+- **The workbook leads.** Lesson text follows the daughter's school workbook (terms, number of phases). Where a university textbook differs, the workbook's version leads and the other is mentioned in the deeper level.
+- **Lessons on request:** a member files a request in the app; `builder/` on the Mac mini builds it with a headless Claude Code session (Max subscription) following the lesson skill, then gates, merges and publishes it. Nothing runs a model at page-view time.
 - `docs/SIGNATURE.md` holds the teaching moves; all are `proposed` until Pavol reviews them.

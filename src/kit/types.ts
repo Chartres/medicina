@@ -109,6 +109,10 @@ export interface Draw {
   /** A tube through points. `rad` and `col` may be functions of the point index. */
   tube(pts: Vec3[], rad: number | ((i: number) => number), col: Col | ((i: number) => Col), sides?: number, closed?: boolean): void
   sphere(c: Vec3, r: number, col: Col): void
+  /** An ellipsoid from its centre and three semi-axis vectors, which set both size and orientation (a mitochondrion, a ribosome subunit, a bead). */
+  ellipsoid(c: Vec3, ax: Vec3, ay: Vec3, az: Vec3, col: Col): void
+  /** A flat strip between two lines of points with the same count (a sheet, a ribbon, one face of a membrane). Visible from both sides. */
+  sheet(a: Vec3[], b: Vec3[], col: Col | ((i: number) => Col)): void
   /** `inner` surfaces (a nucleus) are drawn before outer ones (the cell membrane) so both stay visible. */
   glassSphere(c: Vec3, r: number, col: Col, par: GlassPar | number[], inner?: boolean): void
   /** Surface of revolution about a local x axis. X maps a local point to the model, Xd a local direction; prof(s 0..1) → [x, radius, normal-axial, normal-radial]. */
