@@ -23,6 +23,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pack, readSources } from './method.mjs';
+import { skillSync } from './skill-sync.mjs';
 
 const HOME = os.homedir();
 const cache = path.join(HOME, '.cache/medicina-builder');
@@ -96,6 +98,7 @@ export function parseVerdict(text) {
 }
 
 // One filesystem and network boundary for the session and for the sandboxed checks.
+export function envsFor(cfg) { return envs(cfg); }
 export function policy(cfg, { box, req }) {
   return {
     domains: ['registry.npmjs.org'],
@@ -220,6 +223,8 @@ export async function main(argv, fx, cfg = CFG) {
   if (!takeLock(lock, fx)) return log('another build holds the lock; nothing done'), 0;
   try {
     prune(cfg, fx.now());
+    // Keep the lesson skill in line with its sources before building anything by it.
+    if (!opts.dry && !opts.request) await skillSync({ fx, cfg, log }).catch((e) => log(`skill sync failed: ${e.message}`));
     const db = queue(fx, cfg);
     if (!opts.dry) for (const id of await db.recoverStale()) log(`request ${id} was stuck with no live build: marked failed`);
     if (!opts.request && !opts.dry && (await db.startedLastDay()) >= cfg.perDay) return log(`budget: ${cfg.perDay} builds started in the last 24 h; queue left alone`), 0;
@@ -364,6 +369,8 @@ async function build(row, opts, fx, cfg, db, log) {
       ATTACHMENTS: photos.length ? photos.map((p) => `- ${p}`).join('\n') : '(none)',
       KIND: req.kind,
       SLUG: req.lesson_slug ?? '(choose one)',
+      // the current text of what the lesson skill is derived from, read from main and from Pavol's standards
+      METHOD_DIR: path.dirname(pack(readSources(dir.wt), path.join(dir.req, 'method'), { build: true })),
     });
     if (opts.dry) return say(`dry run: stopped before the session\n  request  ${requestFile}\n  box      ${dir.box}\n  worktree ${dir.wt}\n  settings ${settings}\n--- prompt ---\n${prompt}`), 0;
     if (!fs.existsSync(cfg.srt)) throw new Fail(stage, `sandbox runtime missing at ${cfg.srt}: run builder/install.sh`);
@@ -568,10 +575,10 @@ export function realFx(cfg = CFG) {
     // The session. Containment is in the settings file (see claudeSettings) plus these flags:
     // --restricted drops user and project settings, plugins and hooks and confines the file tools
     // to the working directories; the tool list has no MCP and nothing that runs outside the sandbox.
-    session: async ({ prompt, cwd, settings, addDir, sessionId, resume, model, env, log, timeoutMs }) => {
+    session: async ({ prompt, cwd, settings, addDir, sessionId, resume, model, env, log, timeoutMs, tools = TOOLS }) => {
       let result = null;
       const out = fs.createWriteStream(log, { flags: 'a' });
-      const r = await run('claude', ['-p', `--model=${model}`, '--restricted', `--tools=${TOOLS}`, '--strict-mcp-config', '--disallowedTools=mcp__*', `--settings=${settings}`, `--add-dir=${addDir}`, '--permission-mode=dontAsk', '--permission-prompts=none', '--output-format=stream-json', '--verbose', resume ? `--resume=${sessionId}` : `--session-id=${sessionId}`], {
+      const r = await run('claude', ['-p', `--model=${model}`, '--restricted', `--tools=${tools}`, '--strict-mcp-config', '--disallowedTools=mcp__*', `--settings=${settings}`, `--add-dir=${addDir}`, '--permission-mode=dontAsk', '--permission-prompts=none', '--output-format=stream-json', '--verbose', resume ? `--resume=${sessionId}` : `--session-id=${sessionId}`], {
         cwd, env, timeoutMs, input: prompt,
         onLine: (line) => {
           // A photo the session reads comes back as megabytes of base64; the log keeps a marker instead.

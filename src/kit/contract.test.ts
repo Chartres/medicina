@@ -22,6 +22,22 @@ function sample(def: LessonDef, track: string, step: number, f: number, focus: s
 
 it('finds the lessons', () => expect(lessons.length).toBeGreaterThan(0))
 
+// A lesson is data and a pure drawing function. It has no business with the page, the network or storage,
+// and since lessons can be built unattended this is checked, not trusted. (The site's CSP is the second wall.)
+const sourceFiles = import.meta.glob<string>(['../lessons/*/*.{ts,js}', '../lessons/*/**/*.{ts,js}'], { eager: true, query: '?raw', import: 'default' })
+const FORBIDDEN = /\b(document|window|globalThis|navigator|localStorage|sessionStorage|indexedDB|cookie|fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon|postMessage|Worker|importScripts|eval|Function|setTimeout|setInterval|requestAnimationFrame|constructor|__proto__|prototype|require)\b|\bimport\s*\(|\bimport\.meta|<script|javascript:|\bon[a-z]+\s*=/
+it('lessons are pure: no page, network, storage or dynamic code, and imports only from the kit and their own folder', () => {
+  for (const [file, text] of Object.entries(sourceFiles)) {
+    const code = text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1') // comments may say anything
+    const hit = code.match(FORBIDDEN)
+    expect(hit?.[0], `${file}: a lesson may not use "${hit?.[0]}"`).toBeUndefined()
+    for (const m of code.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) {
+      const ok = /^\.\/[\w./-]+$/.test(m[1]) || /^\.\.\/\.\.\/kit\/[\w.-]+$/.test(m[1]) || (file.endsWith('.test.ts') && m[1] === 'vitest')
+      expect(ok, `${file}: import from "${m[1]}" is outside the kit and the lesson's own folder`).toBe(true)
+    }
+  }
+})
+
 describe.each(lessons)('lesson $folder', ({ folder, def }) => {
   const texts = [
     def.meta.title, def.meta.blurb,

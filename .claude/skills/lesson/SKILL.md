@@ -175,6 +175,9 @@ It draws with `g` and returns `{ extent, hots }`.
   simply not listed. Sub-parts are listed only when their parent (or a sibling) is `s.focus`.
 - **Touch.** The learner turns the model with one finger and zooms with two; the kit handles it.
   Make the model worth turning: put things at different depths (z), not on one plane.
+- **A lesson is pure.** Lesson files import only from `../../kit/` and from their own folder, and
+  never touch the page, the network or storage (`document`, `window`, `fetch`, `localStorage`…);
+  the contract test refuses them. Everything the learner sees outside the model is the kit's.
 - **Idle motion.** Only small, slow, meaningful motion from `s.time` (thermal jiggle of something
   loose). `time` is 0 for learners who asked for reduced motion; the model must still be right.
 - `findable(track)` lists the top-level parts that get a spot at some moment of that track.
@@ -195,13 +198,13 @@ Then **look at the screenshots** (`shots/<slug>/desk-<track>-<i>.png`, `phone-�
 see what the `tip` says? Is anything overlapping, clipped, lost against the background, or
 misleading? Would a student mistake this step for its neighbour? Fix the model, not the text.
 
-Then have the content attacked. Start one subagent whose only job is to **refute** the lesson:
-give it `src/lessons/<slug>/lesson.ts` and the workbook photos, and ask for every claim that is
-false, misleading, unsupported, or differs from the workbook, with a source and a corrected Czech
-sentence of the same length and level, and for anything the model would teach wrongly. It must
-check numbers, absolutes, causal "protože", etymologies and history against sources (web search).
-Apply what it proves; where you disagree, the workbook and a named source decide. Re-run the
-checks.
+Then have the content attacked: every claim that is false, misleading, unsupported, or differs
+from the workbook gets a source and a corrected Czech sentence of the same length and level, and
+so does anything the model would teach wrongly. Check numbers, absolutes, causal "protože",
+etymologies and history against sources (web search). In an interactive session give this to a
+subagent whose only job is to refute the lesson; where subagents are not available, do it yourself
+as a separate pass with that single aim. Apply what is proven; where there is doubt, the workbook
+and a named source decide. Re-run the checks.
 
 `facts.test.ts` must pin at least five facts with known answers that an exam would ask (counts,
 orders, what is where when), asserted against your model's own state and `numbers()`, so that a
@@ -210,19 +213,26 @@ later change cannot quietly make the lesson wrong.
 ## 8. Narration, thumbnail, commit
 
 ```
-node voice/dump.mjs <slug> && voice/build.py <slug>     # Czech voice; fails if a clip is unintelligible
+node voice/dump.mjs <slug> && voice/build.py <slug>     # Czech voice, sentence by sentence; fails if a sentence is unintelligible
 cp shots/<slug>/nahled.png public/<slug>/nahled.png
 npm test && npm run build && node e2e/lesson.mjs <slug>  # the contract now also checks narration matches the text
 ```
 
-Any later change to a step's `name`, `tip` or `desc` means running the narration again.
+Any later change to a step's `name`, `tip` or `desc` means running the narration again. Write for
+the ear as well as the eye: the narration reads the name, the tip and the description sentence by
+sentence, so a sentence that is hard to say aloud is too long.
 
-Commit only the lesson's files, with a message that says what the lesson covers. Do not push, open
-a pull request, or touch anything outside the lesson's paths. End by printing exactly one line:
+Commit only the lesson's files, with a message that says what the lesson covers. Do not push or
+open a pull request. End by printing exactly one line:
 
 ```
 LESSON_SLUG: <slug>
 ```
+
+**When the builder runs you** (its prompt says so) there is no browser, no audio and no git for
+you: run typecheck, tests and build, do the attack pass yourself, and end with the `LESSON_SLUG`
+line. The builder then makes the narration, runs the walk-through, and calls you again with the
+check report or with the screenshots to look at. It commits and publishes; you never do.
 
 ## Revising a lesson
 

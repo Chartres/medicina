@@ -401,7 +401,7 @@ test('result line, path rule, narration shape, prompt placeholders', (t) => {
   assert.equal(fillPrompt('a {{KIND}} b {{SLUG}}', { KIND: 'new', SLUG: 'x' }), 'a new b x');
   assert.throws(() => fillPrompt('{{NOPE}}', {}), /unknown placeholder/);
   // the shipped prompt fills completely, and says what the request is
-  const prompt = fillPrompt(fs.readFileSync(path.join(REPO, 'builder/prompt.md'), 'utf8'), { REQUEST_FILE: '/r.json', ATTACHMENTS: '(none)', KIND: 'new', SLUG: '(choose one)' });
+  const prompt = fillPrompt(fs.readFileSync(path.join(REPO, 'builder/prompt.md'), 'utf8'), { REQUEST_FILE: '/r.json', ATTACHMENTS: '(none)', KIND: 'new', SLUG: '(choose one)', METHOD_DIR: '/m' });
   assert.match(prompt, /DATA/);
   assert.match(prompt, /LESSON_SLUG: <slug>/);
   assert.match(prompt, /LESSON_REJECT: /);

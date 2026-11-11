@@ -18,7 +18,9 @@ const sha = (s) => createHash('sha256').update(s).digest('hex').slice(0, 16)
 
 /** Every source with its current text ('' when the file is missing, e.g. on a machine without the central repos). */
 export function readSources(repo, home = homedir()) {
-  const { sources } = JSON.parse(readFileSync(path.join(repo, SKILL_DIR, 'sources.json'), 'utf8'))
+  const manifest = path.join(repo, SKILL_DIR, 'sources.json')
+  if (!existsSync(manifest)) return [] // a checkout from before the skill had declared sources
+  const { sources } = JSON.parse(readFileSync(manifest, 'utf8'))
   return sources.map((s) => {
     const file = s.path.startsWith('~/') ? path.join(home, s.path.slice(2)) : path.join(repo, s.path)
     let text = existsSync(file) ? readFileSync(file, 'utf8') : ''
@@ -44,7 +46,8 @@ export const drift = (sources, lock) => sources.filter((s) => s.hash && lock.has
  * the skill was last aligned with (kept in `prevDir`, outside any repository) for the ones that changed.
  * Returns the index file's path.
  */
-export function pack(sources, dir, { changed = [], prevDir = null } = {}) {
+export function pack(sources, dir, { changed = [], prevDir = null, build = false } = {}) {
+  if (build) sources = sources.filter((s) => s.build) // a lesson build gets only the sources cleared for it
   mkdirSync(path.join(dir, 'before'), { recursive: true })
   const lines = ['# Sources of truth for building a lesson', '', 'Read these. Where one of them and the lesson skill disagree, the source is right.', '']
   for (const s of sources) {
