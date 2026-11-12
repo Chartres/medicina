@@ -282,7 +282,7 @@ test('a symlink in the lesson, or a slug that names an existing folder, fails th
 
 test('a failing check sends the session back with the report; still failing after the last round is a failed build', async (t) => {
   quiet(t);
-  const w = world(t, { rows: [row()], run: (line) => (line === 'box: npm run test:lessons' ? { code: 1, out: 'AssertionError: 4 !== 5' } : null) });
+  const w = world(t, { rows: [row()], run: (line) => (line === "box: npx vitest run --exclude builder/**" ? { code: 1, out: 'AssertionError: 4 !== 5' } : null) });
   assert.equal(await w.go(), 1);
   assert.equal(w.seen.sessions.length, 4, 'cfg.rounds session turns');
   assert.match(w.seen.sessions[1].prompt, /one failed\. The report is in .*checks\.txt/);
@@ -421,6 +421,8 @@ test('usage limit: the build pauses, keeps its box and session, waits for the re
   assert.ok(!w.seen.notes.at(-1).includes('IGNORE'));
   assert.equal(await w.go(), 0); // ten minutes later: still before the reset
   assert.equal(w.seen.sessions.length, 1);
+  // main moves on while the build waits: the resumed build stays on the commit it started from
+  put(path.join(w.root, 'seed/package.json'), '{"moved":true}'); sh(path.join(w.root, 'seed'), 'git', 'commit', '--quiet', '-am', 'main moves'); sh(path.join(w.root, 'seed'), 'git', 'push', '--quiet', w.origin, 'main');
   w.clock.t = Date.UTC(2026, 10, 11, 21, 5);
   assert.equal(await w.go(), 0);
   assert.equal(w.seen.sessions[1].resume, true);

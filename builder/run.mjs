@@ -67,7 +67,7 @@ export const STEPS = (slug) => [
   { name: 'typecheck', where: 'box', cmd: ['npm', 'run', 'typecheck'] },
   // the lessons' own tests only: the builder's tests drive git and a fake GitHub, which is not this build's business
   // (and they cannot pass inside the sandbox, as the first real build found out after an hour)
-  { name: 'test', where: 'box', cmd: ['npm', 'run', 'test:lessons'] },
+  { name: 'test', where: 'box', cmd: ['npx', 'vitest', 'run', '--exclude', 'builder/**'] },
   { name: 'build', where: 'box', cmd: ['npm', 'run', 'build'] },
   { name: 'e2e', where: 'host', cmd: ['node', 'e2e/lesson.mjs', slug] },
 ];
@@ -362,7 +362,9 @@ async function build(row, opts, fx, cfg, db, log) {
     stage = 'prepare';
     if (!fs.existsSync(dir.repo)) await must(stage, 'git', ['clone', '--quiet', '--bare', cfg.origin, dir.repo]);
     await git(stage, dir.repo, 'fetch', '--quiet', '--prune', cfg.origin, '+refs/heads/main:refs/heads/main');
-    const base = await git(stage, dir.repo, 'rev-parse', 'refs/heads/main');
+    // A resumed build stays on the commit it started from: its box holds that commit's files, and the pull
+    // request's own checks will say whether the lesson still fits whatever main has become.
+    const base = resume?.base ?? await git(stage, dir.repo, 'rev-parse', 'refs/heads/main');
     for (const d of resume ? [dir.wt, dir.hold] : [dir.box, dir.wt, dir.hold]) fs.rmSync(d, { recursive: true, force: true });
     await git(stage, dir.repo, 'worktree', 'prune');
     await git(stage, dir.repo, 'worktree', 'add', '--quiet', '--no-track', '-B', `lesson/${short}`, dir.wt, base);
@@ -439,7 +441,7 @@ async function build(row, opts, fx, cfg, db, log) {
         // Out of allowance (or close enough that Pavol's own work comes first): keep everything, wait, go on later.
         until = s.limit.resetsAt + 90_000;
         fs.mkdirSync(path.dirname(resumeFile), { recursive: true });
-        fs.writeFileSync(resumeFile, JSON.stringify({ sessionId, slug, reviewed }));
+        fs.writeFileSync(resumeFile, JSON.stringify({ sessionId, slug, reviewed, base }));
         fs.writeFileSync(path.join(cfg.cache, 'not-before'), String(until));
         await db.set(id, 'queued', { note: NOTE_PAUSED });
         say(`paused for the usage limit until ${new Date(until).toISOString()}`);
