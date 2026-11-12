@@ -107,7 +107,8 @@ function world(t, s = {}) {
         return put(path.join(wt, 'shots/fotosynteza/desk-0.png'), 'shot'), { code: 0, out: 'ok' };
       }
       if (line.startsWith('gh pr create')) return { code: 0, out: 'https://github.com/Chartres/medicina/pull/7\n' };
-      if (line.startsWith('gh api')) return { code: 0, out: sh(origin, 'git', 'diff', '--name-only', 'main', `lesson/${SHORT}`) };
+      // like GitHub's list of a pull request's files: changes since the branch left main (three dots), not everything that differs
+      if (line.startsWith('gh api')) return { code: 0, out: sh(origin, 'git', 'diff', '--name-only', `main...lesson/${SHORT}`) };
       if (line.startsWith('gh pr view')) return { code: 0, out: `${sh(origin, 'git', 'rev-parse', `lesson/${SHORT}`)} main\n` };
       if (line.startsWith('gh pr checks')) return { code: 0, out: 'gate pass' };
       if (line.startsWith('gh pr merge')) return { code: 0, out: 'merged' };
