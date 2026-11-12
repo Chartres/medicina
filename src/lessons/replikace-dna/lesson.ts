@@ -11,7 +11,8 @@
 import { defineLesson, type Part, type Step } from '../../kit/types.ts'
 import { glass, pigments } from '../../kit/pigments.ts'
 import { counts, drawFork, state } from './model.ts'
-import { meta } from './meta.ts'
+import type { Meta } from '../../kit/types.ts'
+import meta from './meta.json' with { type: 'json' }
 
 const T = (name: string, weight: number, tip: string, desc: string, q: string, a: string, etym: string, short?: string): Step => ({ name, short, weight, tip, desc, q, a, etym })
 const STEPS: Step[] = [
@@ -83,7 +84,7 @@ const POL = glass('polG', 'envelope')
 const FINDABLE = ['dna', 'topo', 'hel', 'fork', 'ssb', 'prim', 'primer', 'pol', 'lead', 'lag', 'oka', 'lig']
 
 export default defineLesson({
-  meta,
+  meta: meta as Meta,
   tracks: [{ id: 'vidlicka', name: 'Replikace', label: 'Replikace DNA', steps: STEPS }],
   parts: PARTS,
   layers: [

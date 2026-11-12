@@ -55,7 +55,7 @@ canvas:active{cursor:grabbing}
 .phases button.past::before{background:var(--mute)}
 .phases button.now::before{background:var(--ink)}
 .phases button.now{color:var(--ink)}
-.phases span{display:block;white-space:nowrap}
+.phases span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px}
 @media(max-width:760px){.phases span{display:none}.phases button{padding-bottom:10px}}
 
 details{border-top:1px solid var(--line)}
