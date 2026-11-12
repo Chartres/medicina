@@ -65,7 +65,9 @@ export const STEPS = (slug) => [
   { name: 'narration text', where: 'box', cmd: ['node', 'voice/dump.mjs', slug] },
   { name: 'narration audio', where: 'host', cmd: ['voice/build.py', slug] },
   { name: 'typecheck', where: 'box', cmd: ['npm', 'run', 'typecheck'] },
-  { name: 'test', where: 'box', cmd: ['npm', 'test'] },
+  // the lessons' own tests only: the builder's tests drive git and a fake GitHub, which is not this build's business
+  // (and they cannot pass inside the sandbox, as the first real build found out after an hour)
+  { name: 'test', where: 'box', cmd: ['npm', 'run', 'test:lessons'] },
   { name: 'build', where: 'box', cmd: ['npm', 'run', 'build'] },
   { name: 'e2e', where: 'host', cmd: ['node', 'e2e/lesson.mjs', slug] },
 ];
