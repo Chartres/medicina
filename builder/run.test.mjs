@@ -282,7 +282,7 @@ test('a symlink in the lesson, or a slug that names an existing folder, fails th
 
 test('a failing check sends the session back with the report; still failing after the last round is a failed build', async (t) => {
   quiet(t);
-  const w = world(t, { rows: [row()], run: (line) => (line === 'box: npm test' ? { code: 1, out: 'AssertionError: 4 !== 5' } : null) });
+  const w = world(t, { rows: [row()], run: (line) => (line === 'box: npm run test:lessons' ? { code: 1, out: 'AssertionError: 4 !== 5' } : null) });
   assert.equal(await w.go(), 1);
   assert.equal(w.seen.sessions.length, 4, 'cfg.rounds session turns');
   assert.match(w.seen.sessions[1].prompt, /one failed\. The report is in .*checks\.txt/);
