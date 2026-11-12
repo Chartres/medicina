@@ -1,11 +1,17 @@
-# A lesson is code that may have been built without a person reading it. It can run only scripts served
-# from this site and talk only to this site and to the sign-in project, so a bad lesson has nowhere
-# to send what it could read. Inline scripts (and inline event handlers in lesson HTML) do not run.
+# The site is static and public; the lesson frame has an origin of its own and loads scripts and audio from here.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://chgwirzbpspoaoposuwg.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Access-Control-Allow-Origin: *
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
-# the first, self-contained version of the cell lesson has its script inline
-/deleni-bunky/v1/*
-  ! Content-Security-Policy
+# Pages that hold the sign-in. Only this site's scripts run; they talk only to this site and the sign-in project.
+/
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://chgwirzbpspoaoposuwg.supabase.co; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+/:lesson/
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://chgwirzbpspoaoposuwg.supabase.co; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+# The lesson frame: code that may not have been read by a person. Sandboxed even when opened on its own
+# (no access to this site's storage or sign-in, cannot move the page around it, open windows or send forms),
+# and it can load and reach only this site.
+/model*
+  Content-Security-Policy: sandbox allow-scripts; default-src 'none'; script-src https://medicina.dravec.org https://*.medicina-1j1.pages.dev; style-src https://medicina.dravec.org https://*.medicina-1j1.pages.dev 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src https://medicina.dravec.org https://*.medicina-1j1.pages.dev data: blob:; media-src https://medicina.dravec.org https://*.medicina-1j1.pages.dev blob:; connect-src https://medicina.dravec.org https://*.medicina-1j1.pages.dev; base-uri 'none'; form-action 'none'; frame-ancestors https://medicina.dravec.org https://*.medicina-1j1.pages.dev

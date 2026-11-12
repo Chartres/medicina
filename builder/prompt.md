@@ -16,7 +16,7 @@ If the request is not a biology, chemistry or physics topic that can be taught a
 
 ## What you can do here
 
-- Change only the lesson's own files: `<slug>/`, `src/lessons/<slug>/`, `public/<slug>/`. A change to anything else (the kit, the platform, other lessons, `package.json`, `.claude/`, `builder/`, `e2e/`, `voice/`) fails the build.
+- Change only the lesson's own files: `src/lessons/<slug>/` and `public/<slug>/`. A change to anything else (the kit, the platform, other lessons, `package.json`, `.claude/`, `builder/`, `e2e/`, `voice/`) fails the build.
 - Your shell is sandboxed: it can write here and nowhere else, and the only network it reaches is the npm registry. `npm ci`, `npm run typecheck`, `npm test` and `npm run build` work, and you should run them until they pass.
 - There is no browser and no audio here. You cannot run the browser walk-through or build narration, and you cannot start subagents; the builder does the first two for you after you finish (see below), and you do the adversarial fact check yourself, as a separate pass in which your only aim is to refute your own lesson against sources.
 - `public/<slug>/nahled.png` is required by the tests before the walk-through has made one: on the first pass copy `public/deleni-bunky/nahled.png` there as a stand-in. When you are called again after the walk-through, replace it with `shots/<slug>/nahled.png`.

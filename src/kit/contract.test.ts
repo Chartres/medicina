@@ -51,8 +51,13 @@ describe.each(lessons)('lesson $folder', ({ folder, def }) => {
     for (const v of [def.meta.title, def.meta.chapter, def.meta.blurb]) expect(v.trim().length).toBeGreaterThan(3)
     expect(def.meta.blurb.length).toBeLessThanOrEqual(240)
     expect(Number.isFinite(def.meta.order)).toBe(true)
-    expect(existsSync(`${folder}/index.html`), `${folder}/index.html (the page stub) is missing`).toBe(true)
-    expect(readFileSync(`${folder}/index.html`, 'utf8')).toContain(`/src/lessons/${folder}/lesson.ts`)
+    // the card is data (meta.json), never code: pages that hold the sign-in read it
+    const card = JSON.parse(readFileSync(`src/lessons/${folder}/meta.json`, 'utf8'))
+    expect(card).toEqual(def.meta)
+    expect(Object.keys(card).every((k) => ['slug', 'title', 'chapter', 'blurb', 'order', 'access', 'provenance'].includes(k)), 'unknown field in meta.json').toBe(true)
+    expect(['premium', 'public']).toContain(card.access)
+    expect(existsSync(`src/lessons/${folder}/meta.ts`), 'the card moved to meta.json').toBe(false)
+    expect(existsSync(`${folder}/index.html`), 'a lesson brings no HTML of its own; its page is generated').toBe(false)
     expect(existsSync(`public/${folder}/nahled.png`), `public/${folder}/nahled.png (home thumbnail) is missing`).toBe(true)
   })
 

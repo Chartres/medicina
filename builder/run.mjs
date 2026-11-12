@@ -73,13 +73,14 @@ export const STEPS = (slug) => [
 ];
 
 // The only paths a lesson build may change.
-export const lessonPaths = (slug) => [`${slug}/`, `src/lessons/${slug}/`, `public/${slug}/`, `voice/narration/${slug}.json`];
+export const lessonPaths = (slug) => [`src/lessons/${slug}/`, `public/${slug}/`, `voice/narration/${slug}.json`];
 export const outside = (files, slug) =>
   files.filter((f) => !lessonPaths(slug).some((p) => (p.endsWith('/') ? f.startsWith(p) : f === p)));
 
 const SLUG = /^[a-z0-9-]{3,40}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const RESERVED = new Set(['node_modules', 'dist', 'shots', 'assets', 'api', 'index']); // not in git, still not a lesson
+// A lesson's slug is its address on the site (/<slug>/), so it may not be a name the site or the repository already uses.
+const RESERVED = new Set(['node_modules', 'dist', 'shots', 'assets', 'api', 'index', 'src', 'public', 'lekce', 'model', 'hlas', 'voice', 'builder', 'docs', 'e2e', 'scripts', 'supabase']);
 const TOOLS = 'Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch';
 const NOTE_FAILED = 'Stavba se nepovedla. Pavol o tom ví.';
 const NOTE_PAUSED = 'Čeká na volnou kapacitu. Bude pokračovat samo.';
@@ -488,7 +489,8 @@ async function build(row, opts, fx, cfg, db, log) {
     const staged = (await git(stage, dir.wt, 'diff', '--cached', '--raw', '--no-renames', '-z', base)).split('\0').filter(Boolean);
     const files = staged.filter((_, i) => i % 2), modes = staged.filter((_, i) => !(i % 2)).map((m) => m.split(' ')[1]);
     if (!files.length || outside(files, slug).length || modes.some((m) => !['100644', '000000'].includes(m))) throw new Fail('paths', 'the commit would hold something other than plain lesson files');
-    const title = oneLine(fs.readFileSync(path.join(dir.wt, 'src/lessons', slug, 'meta.ts'), 'utf8').match(/\btitle:\s*(['"`])(.+?)\1/)?.[2] ?? slug, 90);
+    let title = slug;
+    try { title = oneLine(JSON.parse(fs.readFileSync(path.join(dir.wt, 'src/lessons', slug, 'meta.json'), 'utf8')).title ?? slug, 90) || slug; } catch { /* the contract test has already refused a lesson without a readable card */ }
     const gates = results.map((r) => `- ${r.name}: ok`).join('\n');
     await git(stage, dir.wt, 'commit', '--quiet', '-m', `Lekce: ${title}\n\nBuilt by the lesson builder for request ${short} (${req.kind}).\n\nCo-Authored-By: Claude <noreply@anthropic.com>`);
     kept = true;

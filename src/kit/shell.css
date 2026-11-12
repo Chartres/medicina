@@ -1,0 +1,9 @@
+/* The page around a lesson: a bar with the way home and the account, and the lesson's frame below it. */
+body.shell{--bg:#ebe5d6;--ink:#1c2230;--mute:#565b68;--line:#cbc2ab;--fill:#e0d8c5;--serif:"Fraunces",Georgia,serif;--sans:"Figtree",system-ui,sans-serif;
+  margin:0;height:100dvh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font:17px/26px var(--sans)}
+body.shell[data-theme=fluo]{--bg:#05070d;--ink:#e9edf9;--mute:#a0a8c2;--line:#27314f;--fill:#121a30}
+body.shell *{box-sizing:border-box}
+body.shell :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.bar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px clamp(16px,3vw,40px);border-bottom:1px solid var(--line)}
+.bar .mark{font:500 13px/18px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-decoration:none;min-height:44px;display:flex;align-items:center}
+#lesson{flex:1;min-height:0;width:100%;border:0;display:block;background:var(--bg)}

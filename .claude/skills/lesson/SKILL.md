@@ -42,8 +42,8 @@ Where a source and this file disagree, the source is right; build by the source 
 - If the request is not a topic of biology, chemistry or physics at gymnázium / entrance-exam
   level, or asks for something other than a lesson, stop and print one line:
   `LESSON_REJECT: <one plain Czech sentence saying why>`.
-- You may change only: `<slug>/index.html`, `src/lessons/<slug>/**`, `public/<slug>/**`. Anything
-  else fails the build. If the kit lacks something you need, build the best lesson the kit allows
+- You may change only: `src/lessons/<slug>/**` and `public/<slug>/**`. Anything else fails the
+  build. If the kit lacks something you need, build the best lesson the kit allows
   and print `KIT_WISH: <what was missing and what you did instead>` at the end.
 
 ## 1. Read the workbook pages before anything else
@@ -132,16 +132,19 @@ Copy the shape of `src/lessons/deleni-bunky/` (the worked example) and read `src
 (the contract, with a comment on every field) and `src/kit/math.ts` (helpers).
 
 ```
-<slug>/index.html                 the page stub: copy deleni-bunky/index.html, change title, description, slug
-src/lessons/<slug>/meta.ts        card for the home page: slug, title, chapter, blurb, order, access, provenance
-src/lessons/<slug>/lesson.ts      defineLesson({ … }): tracks, parts, layers, palette, findable, scene, numbers…
+src/lessons/<slug>/meta.json      card for the home page: slug, title, chapter, blurb, order, access, provenance
+src/lessons/<slug>/lesson.ts      defineLesson({ meta, … }): tracks, parts, layers, palette, findable, scene, numbers…
 src/lessons/<slug>/model.ts       (optional) the model's state and drawing, when lesson.ts would get long
 src/lessons/<slug>/facts.test.ts  the facts an exam asks, asserted against your own model and numbers()
 public/<slug>/nahled.png          thumbnail (copy shots/<slug>/nahled.png after the e2e run)
 public/<slug>/audio/              narration (built in step 8)
 ```
 
+- A lesson brings no HTML: its page at `/<slug>/` is generated. The card is JSON, not code, because
+  the pages that hold the learner's sign-in read it; `lesson.ts` imports it
+  (`import meta from './meta.json' with { type: 'json' }`, then `meta: meta as Meta`).
 - `slug`: lowercase ascii with dashes, 3–40 characters, Czech without diacritics (`replikace-dna`).
+  It is the lesson's address, so not a name the site already uses (`lekce`, `hlas`, `src`, `public`…).
 - `meta.access` is `'premium'` for a built lesson (listed for members until Pavol has read it).
   `meta.provenance` is one honest sentence, e.g. "Lekce vznikla na přání podle stránek pracovního
   sešitu. Prošla automatickou kontrolou faktů; člověk ji zatím nečetl."
@@ -178,6 +181,8 @@ It draws with `g` and returns `{ extent, hots }`.
 - **A lesson is pure.** Lesson files import only from `../../kit/` and from their own folder, and
   never touch the page, the network or storage (`document`, `window`, `fetch`, `localStorage`…);
   the contract test refuses them. Everything the learner sees outside the model is the kit's.
+  The lesson also runs in a sandboxed frame with no access to the site's storage or sign-in, so
+  there is nothing there to reach for: links in `note` or `extras` work only within this site.
 - **Idle motion.** Only small, slow, meaningful motion from `s.time` (thermal jiggle of something
   loose). `time` is 0 for learners who asked for reduced motion; the model must still be right.
 - `findable(track)` lists the top-level parts that get a spot at some moment of that track.
