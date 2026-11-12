@@ -1,0 +1,58 @@
+{
+ "slug": "replikace-dna",
+ "pronounce": {
+  "5′": "pět čárka",
+  "3′": "tři čárka",
+  "3′-OH": "tři čárka ó há",
+  "DNA": "dé en á",
+  "RNA": "er en á",
+  "SSB": "es es bé",
+  "I": "jedna",
+  "Y": "ypsilon",
+  "ATP": "á té pé"
+ },
+ "tracks": {
+  "vidlicka": [
+   [
+    "Dvoušroubovice",
+    "Jedna celistvá šroubovice se dvěma modrými řetězci, mezi nimi příčky bází a žádný enzym.",
+    "Před replikací je DNA jedna dvoušroubovice ze dvou mateřských řetězců. Drží pohromadě vodíkovými můstky mezi komplementárními bázemi: adenin proti thyminu, guanin proti cytosinu. Řetězce běží proti sobě, antiparalelně: kde má jeden konec 5′, má druhý konec 3′. Šroubovice je pravotočivá a na jeden závit připadá asi deset párů bází."
+   ],
+   [
+    "Rozplétání",
+    "Zelený kroužek helikázy sedí tam, kde se šroubovice rozestupuje do písmene Y.",
+    "Helikáza se naváže v replikačním počátku a začne dvoušroubovici rozplétat: ruší vodíkové můstky a odděluje řetězce od sebe. Vzniká replikační vidlička. Rozpletené řetězce by se rády spojily zpět, proto je obsadí SSB proteiny. Před vidličkou se zbytek šroubovice nadměrně stáčí, topoizomeráza napětí uvolní tím, že řetězec dočasně přeruší a zase spojí."
+   ],
+   [
+    "Primáza a primer",
+    "Na každém rozpleteném řetězci leží krátký fialový úsek RNA, u něj malá zelená kulička primázy.",
+    "DNA polymeráza neumí začít nový řetězec od nuly, umí jen prodlužovat už existující 3′ konec. Začátek proto udělá primáza: podle předlohy sestaví krátký úsek RNA, primer, dlouhý zpravidla kolem deseti nukleotidů. Na jedné předloze stačí jeden primer na samém začátku. Na druhé ho primáza položí blízko vidličky a bude jich potřeba mnoho."
+   ],
+   [
+    "Vedoucí řetězec",
+    "Na jedné předloze roste souvislý červený řetězec k vidličce, na jeho špičce sedí zelená polymeráza.",
+    "DNA polymeráza přisedne na 3′ konec primeru a přidává nukleotidy podle komplementarity. Nový řetězec roste jen na 3′ konci, tedy ve směru od 5′ ke 3′. Na jedné z předloh míří tento směr k vidličce, polymeráza ji tedy může plynule následovat. Výsledkem je jeden souvislý vedoucí řetězec."
+   ],
+   [
+    "Opožďující se řetězec",
+    "Na druhé předloze vznikají krátké červené kousky, každý roste od vidličky pryč a začíná fialovým primerem.",
+    "Druhá předloha míří opačně, směr od 5′ ke 3′ na ní vede od vidličky pryč. Polymeráza tu nemůže jet za helikázou, postupuje po kouscích pozpátku. Primáza položí nový primer blízko vidličky a polymeráza od něj syntetizuje směrem pryč, dokud nenarazí na předchozí kousek. Těmto úsekům se říká Okazakiho fragmenty. Celý řetězec se nazývá opožďující se, protože za vidličkou zaostává."
+   ],
+   [
+    "Výměna primerů",
+    "Vidlička dojíždí na konec molekuly, fialové primery za ní mizí a nahrazuje je červená DNA.",
+    "RNA v hotové molekule DNA zůstat nesmí. Když polymeráza dalšího fragmentu dorazí k primeru, primer se odstraní a mezera se doplní nukleotidy DNA. U bakterií to zvládne DNA polymeráza I, u člověka na tom spolupracuje několik enzymů. Mezi doplněným úsekem a sousedním fragmentem zůstává nespojené místo, zářez v cukr-fosfátové kostře."
+   ],
+   [
+    "Ligáza",
+    "Vidlička už je pryč, zelená spona ligázy objímá nový řetězec v místě zářezu a spojuje kousky.",
+    "DNA ligáza zářezy zacelí: vytvoří fosfodiesterovou vazbu mezi 3′ koncem jednoho úseku a 5′ koncem druhého. Z Okazakiho fragmentů tak vznikne jeden souvislý řetězec. Na vedoucím řetězci má ligáza práci jen tam, kde byl vyměněn primer. Vidlička mezitím dojela na konec a helikáza i polymerázy se uvolňují."
+   ],
+   [
+    "Dvě molekuly",
+    "Dvě samostatné dvoušroubovice bez enzymů, každá z jednoho modrého starého a jednoho červeného nového řetězce.",
+    "Z jedné molekuly jsou dvě a obě nesou stejnou informaci. Každá má jeden mateřský řetězec a jeden nový, proto se replikace nazývá semikonzervativní. Staré řetězce sloužily jako předloha a nikam se neztratily. Polymeráza si navíc práci po sobě kontroluje, po všech opravách zůstane zhruba jedna chyba na miliardu párů bází."
+   ]
+  ]
+ }
+}
