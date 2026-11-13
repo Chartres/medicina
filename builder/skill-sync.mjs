@@ -16,6 +16,9 @@ import { drift, pack, quoted, readLock, readSources, remember, writeLock } from 
 import { CFG, claudeSettings, envsFor, fillPrompt, policy, realFx } from './run.mjs';
 
 const SKILL = '.claude/skills/lesson/SKILL.md', LOCK = '.claude/skills/lesson/sources.lock.json';
+// The session edits a working copy at the top of its box: Claude Code guards everything under .claude/
+// against edits, and the first real run was refused there. The script puts the result in place.
+const COPY = 'SKILL.md';
 const RETRY_MS = 6 * 3600_000; // after a failed attempt, leave the same change alone this long
 const oneLine = (s, n) => String(s).replace(/[\u0000-\u001f\u007f<>`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
 
@@ -51,6 +54,8 @@ export async function skillSync({ fx, cfg = CFG, log = console.log, home }) {
 
     await must('git', ['clone', '--quiet', '--no-hardlinks', dir.repo, dir.box]);
     await git(dir.box, 'checkout', '--quiet', '--detach', base);
+    const before = fs.readFileSync(path.join(dir.wt, SKILL), 'utf8');
+    fs.writeFileSync(path.join(dir.box, COPY), before);
     fs.mkdirSync(dir.req, { recursive: true });
     const method = path.dirname(pack(sources, path.join(dir.req, 'method'), { changed, prevDir: dir.prev }));
     const settings = path.join(c, 'logs', 'skill-sync.settings.json');
@@ -65,18 +70,20 @@ export async function skillSync({ fx, cfg = CFG, log = console.log, home }) {
     const st0 = await fx.run('git', ['-C', dir.wt, '--no-optional-locks', '-c', 'core.fsmonitor=false', `--work-tree=${dir.box}`, 'status', '--porcelain=v1', '-z', '--untracked-files=all', '--no-renames'], { env });
     if (st0.code !== 0) throw new Error('git status failed');
     const touched = st0.stdout.split('\0').filter(Boolean).map((e) => e.slice(3)); // "XY path"; not trimmed, X may be a space
-    if (touched.some((f) => f !== SKILL)) throw new Error(`the session changed something other than the skill: ${touched.filter((f) => f !== SKILL).slice(0, 5).join(', ')}`);
-    if (touched.length) {
-      const st = fs.lstatSync(path.join(dir.box, SKILL));
-      if (!st.isFile() || st.size > 200_000) throw new Error('the skill is no longer a plain file of sane size');
-      const text = fs.readFileSync(path.join(dir.box, SKILL), 'utf8');
+    if (touched.some((f) => f !== COPY)) throw new Error(`the session changed something other than the skill: ${touched.filter((f) => f !== COPY).slice(0, 5).join(', ')}`);
+    const st = fs.lstatSync(path.join(dir.box, COPY), { throwIfNoEntry: false });
+    if (!st?.isFile() || st.size > 200_000 || st.size < 500) throw new Error('the skill is no longer a plain file of sane size');
+    const text = fs.readFileSync(path.join(dir.box, COPY), 'utf8');
+    const edited = text !== before;
+    if (edited !== verdict.updated) throw new Error(`the session said ${verdict.updated ? 'SKILL_UPDATED' : 'SKILL_UNCHANGED'} but the skill ${edited ? 'changed' : 'did not change'}`);
+    if (edited) {
       const copied = quoted(text, sources);
       if (copied) throw new Error(`the new skill copies a passage from the private source "${copied.source}"; nothing was published`);
       fs.writeFileSync(path.join(dir.wt, SKILL), text);
     }
     writeLock(dir.wt, sources, new Date(fx.now()).toISOString().slice(0, 10));
     await git(dir.wt, 'add', SKILL, LOCK);
-    const title = touched.length ? `Lesson skill: brought in line with ${changed.join(', ')}` : `Lesson skill: checked against ${changed.join(', ')}, no change needed`;
+    const title = edited ? `Lesson skill: brought in line with ${changed.join(', ')}` : `Lesson skill: checked against ${changed.join(', ')}, no change needed`;
     await git(dir.wt, 'commit', '--quiet', '-m', `${title}\n\n${verdict.why}\n\nCo-Authored-By: Claude <noreply@anthropic.com>`);
     const sha = await git(dir.wt, 'rev-parse', 'HEAD');
     await git(dir.wt, 'push', '--quiet', cfg.origin, '+HEAD:refs/heads/skill-sync');
@@ -98,10 +105,10 @@ export async function skillSync({ fx, cfg = CFG, log = console.log, home }) {
     await gh('pr', 'merge', String(pr), '--repo', cfg.github, '--squash', '--delete-branch', '--match-head-commit', sha);
     remember(sources, dir.prev);
     fs.rmSync(dir.tried, { force: true });
-    log(`skill sync: ${touched.length ? 'skill updated' : 'no change needed'} (#${pr})`);
+    log(`skill sync: ${edited ? 'skill updated' : 'no change needed'} (#${pr})`);
     // fixed words, source ids from our own list and a number: no model output goes to the notification rail
-    await fx.notify(`Medicina builder, push this to me now, no planning: the lesson skill was ${touched.length ? 'updated' : 'checked and needed no change'} after changes in ${changed.join(', ')} (PR #${pr}).`).catch(() => {});
-    return touched.length ? 'updated' : 'unchanged';
+    await fx.notify(`Medicina builder, push this to me now, no planning: the lesson skill was ${edited ? 'updated' : 'checked and needed no change'} after changes in ${changed.join(', ')} (PR #${pr}).`).catch(() => {});
+    return edited ? 'updated' : 'unchanged';
   } finally {
     await clean();
   }

@@ -22,7 +22,7 @@ function world(t, session) {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'skill-sync-')));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const seed = path.join(root, 'seed'), home = path.join(root, 'home');
-  put(path.join(seed, SKILL), '# Building a lesson\nA tip is one sentence.\n');
+  put(path.join(seed, SKILL), '# Building a lesson\nA tip is one sentence.\n' + 'The method, line after line. '.repeat(30) + '\n');
   put(path.join(seed, 'src/kit/types.ts'), 'export interface Step { tip: string }\n');
   put(path.join(seed, 'README.md'), 'readme\n');
   put(path.join(seed, '.claude/skills/lesson/sources.json'), JSON.stringify({ sources: [
@@ -64,7 +64,7 @@ test('nothing changed: no session, nothing pushed', async (t) => {
 });
 
 test('a changed source: a session without shell or web edits the skill; the lock moves; merged on green; Pavol is told in fixed words', async (t) => {
-  const w = world(t, (box) => { fs.appendFileSync(path.join(box, SKILL), 'A step may carry a short label.\n'); return 'done\nSKILL_UPDATED: steps may carry a short label (contract).'; });
+  const w = world(t, (box) => { fs.appendFileSync(path.join(box, 'SKILL.md'), 'A step may carry a short label.\n'); return 'done\nSKILL_UPDATED: steps may carry a short label (contract).'; });
   w.change();
   assert.equal(await skillSync({ fx: w.fx, cfg: w.cfg, log: () => {}, home: w.home }), 'updated');
   const s = w.seen.sessions[0];
@@ -88,7 +88,9 @@ test('no change needed: only the lock moves', async (t) => {
 test('a session that touches anything else, copies a private passage, or gives no verdict publishes nothing; the same change is not retried at once', async (t) => {
   for (const [session, why] of [
     [(box) => { fs.writeFileSync(path.join(box, 'README.md'), 'hijacked\n'); return 'SKILL_UPDATED: x'; }, /something other than the skill/],
-    [(box) => { fs.appendFileSync(path.join(box, SKILL), PRIVATE); return 'SKILL_UPDATED: x'; }, /copies a passage from the private source "taste"/],
+    [(box) => { fs.appendFileSync(path.join(box, 'SKILL.md'), PRIVATE); return 'SKILL_UPDATED: x'; }, /copies a passage from the private source "taste"/],
+    [(box) => { fs.appendFileSync(path.join(box, SKILL), 'edited in place\n'); return 'SKILL_UPDATED: x'; }, /something other than the skill/],
+    [() => 'SKILL_UPDATED: I changed nothing', /said SKILL_UPDATED but the skill did not change/],
     [() => 'I am done.', /without SKILL_UPDATED/],
   ]) {
     const w = world(t, session);
