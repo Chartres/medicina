@@ -213,7 +213,8 @@ and a named source decide. Re-run the checks.
 
 `facts.test.ts` must pin at least five facts with known answers that an exam would ask (counts,
 orders, what is where when), asserted against your model's own state and `numbers()`, so that a
-later change cannot quietly make the lesson wrong.
+later change cannot quietly make the lesson wrong. The contract test refuses a lesson whose
+folder has no `*.test.ts`, so a lesson without its fact test does not pass the gate.
 
 ## 8. Narration, thumbnail, commit
 
@@ -223,9 +224,10 @@ cp shots/<slug>/nahled.png public/<slug>/nahled.png
 npm test && npm run build && node e2e/lesson.mjs <slug>  # the contract now also checks narration matches the text
 ```
 
-Any later change to a step's `name`, `tip` or `desc` means running the narration again. Write for
-the ear as well as the eye: the narration reads the name, the tip and the description sentence by
-sentence, so a sentence that is hard to say aloud is too long.
+Narration is a settled part of every lesson, not an extra. Any later change to a step's `name`,
+`tip` or `desc` means running the narration again. Write for the ear as well as the eye: the
+narration reads the name, the tip and the description sentence by sentence, with a pause between
+sentences, so a sentence that is hard to say aloud is too long.
 
 Commit only the lesson's files, with a message that says what the lesson covers. Do not push or
 open a pull request. End by printing exactly one line:
@@ -237,7 +239,10 @@ LESSON_SLUG: <slug>
 **When the builder runs you** (its prompt says so) there is no browser, no audio and no git for
 you: run typecheck, tests and build, do the attack pass yourself, and end with the `LESSON_SLUG`
 line. The builder then makes the narration, runs the walk-through, and calls you again with the
-check report or with the screenshots to look at. It commits and publishes; you never do.
+check report or with the screenshots to look at. It commits and publishes; you never do. Once the
+checks are green it merges without anyone reading the lesson and lists it for members, marked as
+not yet read by a person. Your attack pass and your fact test are therefore the last check before
+a learner sees it; do them as if no one else will.
 
 ## Revising a lesson
 
