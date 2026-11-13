@@ -1,4 +1,4 @@
-# Na medicínu — signature (draft, not yet reviewed by Pavol)
+# Na medicínu — signature
 
 Registered in the flywheel as `medicina` (pet track). This file records which classics shaped
 the lessons, so the moves can be judged and, if approved, generalized into a standard for explainers.
@@ -36,7 +36,15 @@ rim-darkening shader. Fraunces for names and numerals, Figtree for text.
 
 ## Added the same evening
 
-6. **Optional narration** (`proposed`). A Czech voice reads the phase; the clip's clock drives the animation and the word being spoken is marked on the page. Lineage: Comenius again (word, picture and sound together); Mayer's modality and signalling principles (2001). Voice: Piper `cs_CZ-jirka-medium`, local, CC0 dataset. The cloned house voice (Qwen3-TTS) was tried and does not speak Czech intelligibly.
+6. **Optional narration** (`approved` 2026-11-13). A Czech voice reads the phase; the clip's clock drives the animation and the word being spoken is marked on the page. Lineage: Comenius again (word, picture and sound together); Mayer's modality and signalling principles (2001). Voice: Piper `cs_CZ-jirka-medium`, local, CC0 dataset. The cloned house voice (Qwen3-TTS) was tried and does not speak Czech intelligibly.
 
 7. **Progress measures depth, not points** (`proposed`). The record is a set of marks: what was looked at, which parts were opened, which "Víc do hloubky" and which questions were read, what was found, named and ordered. The home page shows them as plain counts per lesson. Nothing is ever taken away and nothing is scored. Lineage: Montessori's record of work, kept for the teacher and the child, in place of grades.
 8. **The workbook leads** (`proposed`). Terms, the number of phases and the checkpoints follow the learner's own school workbook; where a university textbook says more, the lesson says so inside the deeper level.
+9. **Lessons on request, built by the method** (`approved` 2026-11-13). A member files a topic and photos of workbook pages in the app; a contained session on Pavol's machine builds the lesson by `.claude/skills/lesson/SKILL.md`, a script checks it, merges on green and publishes it for members, marked as not yet read by a person. Lineage: Comenius, *Didactica magna* (one method, so that teaching can be repeated).
+
+## Decision log
+
+- **2026-11-10/11** — Pavol asked for each of these directly and saw them built: the 3D model with progressive disclosure ("get into greater detail if you like on one part without being overwhelmed at first sight"), the classics and Montessori applied ("make this one notch more useful as a tool to understand the topic"), narration that marks the spoken word ("karaoke principle"), login and progress "heavier on the deepening vs testing", lessons generated in the app for Agnes on his Max subscription, the skill updated automatically from central changes.
+- **2026-11-11** — Voice: "the Czech voice is quite terrible, it just drones on without pacing" (Piper, one block per step). Options put to him by ear at `/hlas/`: A Piper, B Pocket TTS Czech in the house voice read sentence by sentence with set pauses, C/D XTTS-v2.
+- **2026-11-13** — Pavol: "Auto merge is fine. Voice B also." So: built lessons merge without his click (sandboxed, members-only, marked unread, he is notified); the narration voice is B. Moves 6 and 9 are approved. Moves 1–5, 7 and 8 stay `proposed`: he has seen them and has not ruled on them. The summary he asked for is at me.dravec.org/lesson-standard.html.
+

@@ -1,7 +1,7 @@
 // Every lesson, checked against the contract and the house rules, without a browser. This is the gate a
 // generated lesson has to pass before anyone looks at it: a rule that matters belongs here, not in prose.
 import { describe, expect, it } from 'vitest'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { createDraw } from './gl.js'
 import type { LessonDef, SceneIn } from './types.ts'
 
@@ -59,6 +59,8 @@ describe.each(lessons)('lesson $folder', ({ folder, def }) => {
     expect(existsSync(`src/lessons/${folder}/meta.ts`), 'the card moved to meta.json').toBe(false)
     expect(existsSync(`${folder}/index.html`), 'a lesson brings no HTML of its own; its page is generated').toBe(false)
     expect(existsSync(`public/${folder}/nahled.png`), `public/${folder}/nahled.png (home thumbnail) is missing`).toBe(true)
+    // the facts an exam asks are pinned against the lesson's own model, so a later change cannot quietly make it wrong
+    expect(readdirSync(`src/lessons/${folder}`).some((f) => f.endsWith('.test.ts')), `src/lessons/${folder}/ has no fact test (facts.test.ts)`).toBe(true)
   })
 
   it('first sight is one sentence; every step carries all three depths', () => {
