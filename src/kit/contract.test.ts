@@ -144,7 +144,11 @@ describe.each(lessons)('lesson $folder', ({ folder, def }) => {
       expect(s, 'emoji').not.toMatch(/\p{Extended_Pictographic}/u)
       expect(s, 'gendered past tense about the learner').not.toMatch(/\b(jsi|bys|ses|sis)\s+\p{L}+l[ao]?\b|\b\p{L}+l[ao]?\s+(jsi|bys|ses|sis)\b/u)
       expect(s, 'hype word').not.toMatch(/\b(úžasn|fascinuj|neuvěřiteln|zázra|magick|geniáln|super\b)/i)
+      expect(s, 'intensifier: say it at its real size').not.toMatch(/(^|[^\p{L}])(naprosto|absolutně|doslova|extrémně|nesmírně|rozhodně|jednoznačně)(?!\p{L})/iu)
     }
+    // "nikdy" and "vždy" are for what is literally so; as emphasis they are melodrama. A lesson gets a few.
+    const absolutes = texts.join(' ').match(/(^|[^\p{L}])(nikdy|vždy|vždycky|pokaždé)(?!\p{L})/giu) ?? []
+    expect(absolutes.length, `${absolutes.length} × nikdy/vždy: keep them for what is literally so, write "ne" elsewhere`).toBeLessThanOrEqual(4)
   })
 
   it('narration, when present, was built from the current text', () => {
