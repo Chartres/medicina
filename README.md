@@ -17,7 +17,7 @@ meiosis II starts exactly where meiosis I ends.
     npm run e2e       # builds, then walks the lesson in Chrome
 
 Sweeps both modes at desktop and phone width, checks the chromosome counts, the seam between the
-two meiotic divisions, that the four gametes differ, that the spindle never crosses an intact
+two meiotic divisions, that the four gametes differ, that the spindle does not cross an intact
 nuclear envelope, and walks every lesson step and the narration. Needs Google Chrome.
 
 ## Narration
