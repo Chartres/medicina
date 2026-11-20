@@ -432,3 +432,9 @@ test('usage limit: the build pauses, keeps its box and session, waits for the re
   assert.equal(statuses(w).at(-1), 'live');
   assert.ok(!fs.existsSync(path.join(w.cfg.cache, 'resume', `${ID}.json`)));
 });
+
+test('a note to say-inbox names medicina, so its push reads [say · medicina]', () => {
+  const src = fs.readFileSync(fileURLToPath(new URL('./run.mjs', import.meta.url)), 'utf8');
+  const notify = src.slice(src.indexOf('notify: async (text) =>'), src.indexOf('.unref();', src.indexOf('notify: async (text) =>')));
+  assert.match(notify, /env: \{ \.\.\.process\.env, SAY_FROM: 'medicina' \}/);
+});

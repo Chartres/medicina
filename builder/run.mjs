@@ -629,11 +629,11 @@ export function realFx(cfg = CFG) {
       return { ...r, result, limit };
     },
     // Pavol's rail: a typed note to say-inbox becomes one push to his phone (think/inbox/ticket-watch.py
-    // does the same). It takes minutes, so it is started and left alone.
+    // does the same), tagged [say · medicina] through think/msg. It takes minutes, so it is started and left alone.
     notify: async (text) => {
       if (!fs.existsSync(cfg.say)) throw new Error(`no say-inbox at ${cfg.say}`);
       const log = fs.openSync(path.join(cfg.cache, 'logs', 'notify.log'), 'a');
-      spawn(cfg.say, [text], { detached: true, stdio: ['ignore', log, log] }).unref();
+      spawn(cfg.say, [text], { detached: true, stdio: ['ignore', log, log], env: { ...process.env, SAY_FROM: 'medicina' } }).unref();
     },
   };
 }
