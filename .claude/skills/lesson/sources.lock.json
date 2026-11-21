@@ -1,5 +1,5 @@
 {
-  "synced": "2026-11-20",
+  "synced": "2026-11-21",
   "hashes": {
     "contract": "e16c5483fe17c879",
     "rules": "b5cf30a066fed5d6",
@@ -9,7 +9,7 @@
     "signature": "2cd6239b77548509",
     "fw-signature": "a80512819bc8e237",
     "fw-taste": "54a07d980ba299e7",
-    "fw-mobile": "7542d58d79b73ad6",
+    "fw-mobile": "ad0ded863011528d",
     "voice": "7d7c8f7876d03bb1",
     "deslop": "9e3339dfcad2604f"
   }
