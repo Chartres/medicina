@@ -120,7 +120,9 @@ Each comes from a tested source and has a concrete consequence. Follow all of th
 - Plain, direct, calm. Short sentences. One idea per sentence. Second person singular, present
   tense ("otoč si", "uvidíš"). No gendered forms for the learner (no "viděla jsi", no
   "sama"); no exclamation marks, emoji, hype ("úžasný", "fascinující"), or filler openers.
-- Full diacritics. Workbook terms. Explain a new term in the sentence that introduces it.
+- Full diacritics. Workbook terms, and the workbook's units (°C rather than K, nm rather than Å,
+  the concentration unit her page uses). A university or trade word may follow the learner's
+  word, not replace it. Explain a new term in the sentence that introduces it.
 - Do not use "není to X, je to Y" contrasts, lists of three for rhythm, or closing morals.
 - Say things at their real size. "Ne" where you mean not, "nikdy" only where it is literally
   never; the same for "vždy", "každý", "žádný", "vůbec". No intensifiers ("naprosto",
