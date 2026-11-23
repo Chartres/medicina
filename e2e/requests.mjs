@@ -1,5 +1,5 @@
 // "Lekce na přání" end to end in a real browser, with the backend stubbed: no sign-in, no e-mail,
-// nothing reaches Supabase. Run: node e2e/requests.mjs   (needs Google Chrome)
+// nothing reaches Supabase. Run: node e2e/requests.mjs   (needs Google Chrome, or PW_CHROMIUM=/path/to/chromium)
 //
 // The app is served by the dev server with a made-up Supabase address; every request to it is
 // answered here from a small in-memory copy of the three things the page talks to (the member
@@ -28,7 +28,7 @@ const server = spawn('npx', ['vite', '--port', String(PORT), '--strictPort'], {
   cwd: dir, stdio: 'ignore', env: { ...process.env, VITE_SUPABASE_URL: API, VITE_SUPABASE_PUBLISHABLE_KEY: 'stub' },
 })
 // The analytics client drops events from automated browsers. Look like a person, so the event can be checked.
-const browser = await chromium.launch({ channel: 'chrome', args: ['--disable-blink-features=AutomationControlled'] })
+const browser = await chromium.launch({ ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : { channel: 'chrome' }), args: ['--disable-blink-features=AutomationControlled'] })
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'
 const errors = []
 let failed = false
