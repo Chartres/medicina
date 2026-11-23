@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run test:lessons && node --test builder/*.test.mjs",
     "test:lessons": "vitest run --exclude 'builder/**'",
-    "e2e": "npm run build && node e2e/lesson.mjs && node e2e/requests.mjs"
+    "e2e": "npm run build && node e2e/seo.mjs && node e2e/lesson.mjs && node e2e/requests.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0"

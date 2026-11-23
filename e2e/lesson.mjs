@@ -2,7 +2,8 @@
 //   node e2e/lesson.mjs [slug …]      (default: every lesson)   — run `npm run build` first, or use `npm run e2e`
 // It is generic: it reads the lesson's own definition from the page, so a new lesson needs no new test code.
 // Screenshots of every step land in shots/<slug>/ — look at them; a green run only proves nothing crashed.
-// Uses system Chrome (narration is AAC, which the bundled Chromium cannot play) with software GL.
+// Uses system Chrome (narration is AAC, which the bundled Chromium cannot play) with software GL;
+// PW_CHROMIUM=/path/to/chromium runs it on another browser binary (sandboxes without Chrome).
 import { createRequire } from 'node:module'
 import assert from 'node:assert/strict'
 import { mkdirSync, readdirSync, existsSync } from 'node:fs'
@@ -18,7 +19,7 @@ for (const s of slugs) assert.ok(existsSync(`${dir}dist/${s}/index.html`), `dist
 
 const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: dir, stdio: 'ignore' })
 await new Promise((r) => setTimeout(r, 2500))
-const browser = await chromium.launch({ channel: 'chrome', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
+const browser = await chromium.launch({ ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : { channel: 'chrome' }), args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
 const errors = []
 
 try {

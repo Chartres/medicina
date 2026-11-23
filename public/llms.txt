@@ -1,0 +1,27 @@
+# Na medicínu
+
+> Interaktivní lekce biologie v češtině pro přípravu na přijímací zkoušky na lékařské fakulty. Každá lekce je prostorový model, který si student otočí, rozebere na očíslované části a projde ve čtyřech krocích (Prohlížej, Najdi, Pojmenuj, Seřaď), volitelně s mluveným výkladem. Veřejné lekce jsou zdarma, bez reklam a bez účtu; přihlášení e-mailem (bez hesla) jen přenáší postup mezi zařízeními.
+>
+> Interactive biology lessons in Czech for medical-school entrance exam prep. Each lesson is a 3D model the learner turns, opens part by part and works through in four steps, with optional narration. Public lessons are free, ad-free and need no account; signing in by e-mail (no password) only syncs progress between devices.
+
+## What it is
+- A web app in Czech (gymnázium level) with biology lessons for Czech medical-school entrance exams, in the order of a school workbook's chapters.
+- Lessons are added over time; the sitemap lists every public lesson page.
+- Progress is kept in the browser; with sign-in it syncs to the cloud.
+- Some newer lessons are shown only to invited members until a person has read them; they are not listed here.
+
+## How to use it
+- Course home with all lessons in workbook order: https://medicina.dravec.org/
+- A lesson, e.g. cell cycle and cell division: https://medicina.dravec.org/deleni-bunky/
+
+## Data & provenance
+- Lesson text follows a Czech school biology workbook (terms, number of phases); where a university textbook differs, that is mentioned in the deeper level.
+- The cell-division lesson was checked by two independent reviews against standard sources (corrections applied 2026-11-10). It is study material, not medical advice.
+
+## Links
+- App: https://medicina.dravec.org/
+- Source: https://github.com/Chartres/medicina
+- Sitemap: https://medicina.dravec.org/sitemap.xml
+
+## Contact
+- Issues: https://github.com/Chartres/medicina/issues
