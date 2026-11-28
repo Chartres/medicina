@@ -124,6 +124,11 @@ Each comes from a tested source and has a concrete consequence. Follow all of th
   the concentration unit her page uses). A university or trade word may follow the learner's
   word, not replace it. Explain a new term in the sentence that introduces it.
 - Do not use "není to X, je to Y" contrasts, lists of three for rhythm, or closing morals.
+- Every sentence gives the learner something the picture alone does not: a name, a number, a
+  cause, what changes, or what to look for. A sentence that only captions what the model already
+  shows ("Buňka je kulatá.") is filler; cut it, or turn it into the feature that tells this step
+  from its neighbours. Move 8 is the other half of this: the text and the model each carry
+  what the other cannot.
 - Say things at their real size. "Ne" where you mean not, "nikdy" only where it is literally
   never; the same for "vždy", "každý", "žádný", "vůbec". No intensifiers ("naprosto",
   "absolutně", "doslova", "extrémně", "rozhodně"): an ordinary fact gets an ordinary sentence.
